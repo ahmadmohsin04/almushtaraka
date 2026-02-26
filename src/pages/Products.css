@@ -65,3 +65,9 @@
   font-weight: bold;
   color: #e2b96f;
 }
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+}

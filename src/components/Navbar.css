@@ -16,14 +16,67 @@
   letter-spacing: 1px;
 }
 
+.navbar-links {
+  display: flex;
+  gap: 25px;
+}
+
 .navbar-links a {
   color: #ffffff;
   text-decoration: none;
-  margin-left: 25px;
   font-size: 1rem;
   transition: color 0.3s;
 }
 
 .navbar-links a:hover {
   color: #e2b96f;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: #e2b96f;
+  border-radius: 3px;
+  transition: all 0.3s;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: #1a1a2e;
+    padding: 20px;
+    gap: 15px;
+    z-index: 99;
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+  .navbar-links a {
+    font-size: 1.1rem;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2a4e;
+  }
 }

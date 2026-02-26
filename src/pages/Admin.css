@@ -279,3 +279,22 @@
   color: #1a1a2e;
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-card {
+    padding: 20px 15px;
+  }
+}

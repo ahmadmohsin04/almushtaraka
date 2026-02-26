@@ -232,3 +232,45 @@
   color: #333;
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .agreement-form {
+    padding: 20px 15px;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-group {
+    min-width: 100%;
+  }
+
+  .products-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .totals-box,
+  .payment-summary {
+    max-width: 100%;
+  }
+
+  .btn-preview {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .schedule-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
