@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import AgreementForm from '../components/AgreementForm';
-import AgreementPreview from '../components/AgreementPreview';
 import './Agreement.css';
 
 function Agreement() {
