@@ -1,0 +1,236 @@
+.preview-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.preview-actions-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn-back-preview {
+  background: none;
+  border: none;
+  color: #1a1a2e;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-back-preview:hover {
+  color: #e2b96f;
+}
+
+.btn-generate-pdf {
+  background: #e2b96f;
+  color: #1a1a2e;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-generate-pdf:hover {
+  background: #d4a45a;
+}
+
+.preview-document {
+  background: white;
+  padding: 40px 50px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  font-family: 'Arial', sans-serif;
+  font-size: 0.85rem;
+  color: #111;
+  width: 794px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.preview-header-left h1 {
+  font-size: 1.3rem;
+  color: #1a1a2e;
+  margin: 0 0 5px 0;
+}
+
+.preview-header-left p {
+  margin: 0;
+  color: #555;
+}
+
+.preview-copy-badge {
+  background: #1a1a2e;
+  color: #e2b96f;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.seller-sig-img {
+  width: 210px;
+  height: 100px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fafafa;
+  display: block;
+  margin-top: 5px;
+}
+.hide-on-print {
+  display: none !important;
+}
+.preview-title {
+  text-align: center;
+  margin: 15px 0;
+  border-top: 2px solid #1a1a2e;
+  border-bottom: 2px solid #1a1a2e;
+  padding: 10px 0;
+}
+
+.preview-title h2 {
+  margin: 0;
+  color: #1a1a2e;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.preview-ref-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
+  font-size: 0.9rem;
+}
+
+.preview-parties {
+  display: flex;
+  gap: 40px;
+  margin: 20px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.preview-party {
+  flex: 1;
+}
+
+.preview-party p {
+  margin: 4px 0;
+}
+
+.party-label {
+  font-weight: bold;
+  color: #1a1a2e;
+  font-size: 1rem;
+  margin-bottom: 8px !important;
+  text-decoration: underline;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 0.85rem;
+}
+
+.preview-table th {
+  background: #1a1a2e;
+  color: white;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.preview-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.total-row-preview td {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.total-row-final td {
+  background: #1a1a2e;
+  color: white;
+  font-weight: bold;
+}
+
+.preview-section {
+  margin: 20px 0;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.section-title {
+  font-weight: bold;
+  color: #1a1a2e;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  text-decoration: underline;
+}
+
+.term-item {
+  margin: 8px 0;
+  line-height: 1.6;
+  color: #333;
+}
+
+.preview-signatures {
+  display: flex;
+  gap: 40px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #1a1a2e;
+}
+
+.sig-box {
+  flex: 1;
+}
+
+.sig-box p {
+  margin: 4px 0;
+}
+
+.sig-label {
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.sig-canvas {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: block;
+  margin-top: 5px;
+  background: #fafafa;
+  cursor: crosshair;
+}
+
+.btn-clear-sig {
+  background: none;
+  border: 1px solid #ccc;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  color: #666;
+}
+
+.btn-clear-sig:hover {
+  border-color: #e2b96f;
+  color: #e2b96f;
+}

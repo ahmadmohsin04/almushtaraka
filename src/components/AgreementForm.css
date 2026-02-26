@@ -1,0 +1,234 @@
+.agreement-form {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.form-header h2 {
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.ref-box {
+  background: #1a1a2e;
+  color: #e2b96f;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.form-section {
+  margin-bottom: 35px;
+  padding-bottom: 35px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-section h3 {
+  color: #1a1a2e;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  padding-left: 10px;
+  border-left: 4px solid #e2b96f;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border 0.3s;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #e2b96f;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.products-table th {
+  background: #1a1a2e;
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.products-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.products-table td input,
+.products-table td select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.products-table td input:focus {
+  border-color: #e2b96f;
+}
+
+.amount-cell {
+  font-weight: bold;
+  color: #1a1a2e;
+  white-space: nowrap;
+}
+
+.btn-remove {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.btn-add-product {
+  background: none;
+  border: 2px dashed #e2b96f;
+  color: #e2b96f;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: bold;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+}
+
+.btn-add-product:hover {
+  background: #e2b96f;
+  color: white;
+}
+
+.totals-box,
+.payment-summary {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 400px;
+  margin-left: auto;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 0.95rem;
+  color: #555;
+  border-bottom: 1px solid #eee;
+}
+
+.total-final {
+  font-weight: bold;
+  color: #1a1a2e;
+  font-size: 1.05rem;
+  border-bottom: none;
+  margin-top: 5px;
+}
+
+.payment-schedule {
+  margin-top: 25px;
+}
+
+.payment-schedule h4 {
+  color: #1a1a2e;
+  margin-bottom: 15px;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.schedule-table th {
+  background: #1a1a2e;
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.schedule-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.schedule-table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.form-actions {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.btn-preview {
+  background: #1a1a2e;
+  color: #e2b96f;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-preview:hover {
+  background: #e2b96f;
+  color: #1a1a2e;
+}
+
+.input-readonly {
+  background: #f0f0f0;
+  color: #333;
+  cursor: not-allowed;
+}
