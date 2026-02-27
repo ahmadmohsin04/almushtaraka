@@ -248,3 +248,65 @@
   border-color: #e2b96f;
   color: #e2b96f;
 }
+
+@media (max-width: 768px) {
+  .preview-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .preview-document {
+    width: 100%;
+    padding: 20px 15px;
+    font-size: 0.75rem;
+    overflow-x: hidden;
+  }
+
+  .preview-actions-top {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .btn-generate-pdf {
+    width: 100%;
+  }
+
+  .btn-back-preview {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .preview-parties {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px;
+  }
+
+  .preview-table {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.75rem;
+  }
+
+  .preview-signatures {
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .sig-canvas {
+    width: 100% !important;
+    max-width: 300px;
+  }
+
+  .preview-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .preview-ref-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

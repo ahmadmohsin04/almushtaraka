@@ -334,49 +334,28 @@
 
 @media (max-width: 768px) {
   .hero {
-    padding: 60px 20px 0;
+    padding: 60px 0 0;
     min-height: auto;
+  }
+
+  .hero-content {
+    padding: 0 20px 50px;
   }
 
   .hero-title {
     font-size: 3.5rem;
   }
 
-.hero-stats {
-  background: rgba(0,0,0,0.15);
-  border-top: 1px solid #2a3d28;
-  display: flex;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  padding: 0 40px;
-  justify-content: center;
-}
+  .hero-stats {
+    flex-wrap: wrap;
+    padding: 0;
+    justify-content: center;
+  }
 
   .stat-item {
-    flex: 1 1 45%;
+    flex: 1 1 50%;
     border-bottom: 1px solid #2a3d28;
-  }
-
-  .section-divider,
-  .services {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .cta-banner {
-    padding: 50px 20px;
-  }
-
-  .cta-content h2 {
-    font-size: 2rem;
-  }
-
-  .footer-inner {
-    flex-direction: column;
-    text-align: center;
+    border-right: 1px solid #2a3d28;
+    padding: 20px 10px;
   }
 }
