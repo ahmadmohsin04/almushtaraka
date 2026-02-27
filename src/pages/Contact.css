@@ -1,0 +1,236 @@
+.contact-page {
+  padding: 0;
+}
+
+/* Hero */
+.contact-hero {
+  background: var(--forest);
+  padding: 80px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 50%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 40px,
+    rgba(200, 169, 110, 0.04) 40px,
+    rgba(200, 169, 110, 0.04) 41px
+  );
+  pointer-events: none;
+}
+
+.contact-hero-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.contact-tag {
+  display: inline-block;
+  background: rgba(200, 169, 110, 0.12);
+  color: var(--gold);
+  padding: 6px 14px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  border: 1px solid rgba(200, 169, 110, 0.25);
+}
+
+.contact-hero h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 5rem;
+  font-weight: 800;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 15px;
+  letter-spacing: -1px;
+}
+
+.contact-hero p {
+  color: #7a9478;
+  font-size: 1.05rem;
+  max-width: 500px;
+  line-height: 1.7;
+}
+
+/* Body */
+.contact-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+/* Region */
+.region-block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.region-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--grey-mid);
+}
+
+.region-flag {
+  font-size: 1.8rem;
+}
+
+.region-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--forest);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Locations grid */
+.locations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Location card */
+.location-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 28px;
+  border: 1px solid var(--grey-mid);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.location-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--gold);
+}
+
+.location-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.location-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.location-icon {
+  font-size: 1.2rem;
+}
+
+.location-type span:last-child {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  background: rgba(200, 169, 110, 0.1);
+  padding: 3px 10px;
+  border-radius: 3px;
+}
+
+.location-address {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--grey-mid);
+}
+
+.location-address p {
+  color: var(--forest);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin: 0;
+  font-weight: 500;
+}
+
+.location-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  border: 1px solid transparent;
+}
+
+.contact-item:hover {
+  background: var(--cream);
+  border-color: var(--cream-dark);
+}
+
+.contact-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  background: rgba(200, 169, 110, 0.1);
+  padding: 2px 8px;
+  border-radius: 3px;
+  min-width: 48px;
+  text-align: center;
+}
+
+.contact-value {
+  font-size: 0.88rem;
+  color: var(--forest);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .contact-hero {
+    padding: 60px 20px;
+  }
+
+  .contact-hero h1 {
+    font-size: 3rem;
+  }
+
+  .contact-body {
+    padding: 40px 15px;
+    gap: 35px;
+  }
+
+  .locations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .location-card {
+    padding: 20px;
+  }
+}

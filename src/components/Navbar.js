@@ -17,8 +17,8 @@ function Navbar() {
         <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
           <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Home</Link>
           <Link to="/products" className={location.pathname === '/products' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Products</Link>
-          <Link to="/agreement" className={`nav-cta ${location.pathname === '/agreement' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>Create Agreement</Link>
-        </div>
+          <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Contact</Link>
+          <Link to="/agreement" className={`nav-cta ${location.pathname === '/agreement' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>Create Agreement</Link>        </div>
 
         <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
           <span className={menuOpen ? 'open' : ''}></span>
