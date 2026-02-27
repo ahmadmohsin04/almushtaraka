@@ -2,28 +2,6 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-}
-
-.page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-h1 {
-  color: #1a1a2e;
-}
-
-p {
-  color: #666;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: 20px 15px;
-  }
+.content {
+  min-height: calc(100vh - 70px);
 }

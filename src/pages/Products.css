@@ -1,73 +1,75 @@
 .products-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
 .products-header h1 {
-  font-size: 2.2rem;
-  color: #1a1a2e;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 3rem;
+  color: var(--forest);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
 }
 
 .products-header p {
-  color: #666;
-  font-size: 1.1rem;
+  color: var(--grey-text);
+  font-size: 1.05rem;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
+.products-coming-soon {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 80px 40px;
+  text-align: center;
+  border: 1px solid var(--grey-mid);
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: var(--card-shadow);
 }
 
-.product-card {
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
+.coming-soon-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: spin 8s linear infinite;
 }
 
-.product-card:hover {
-  transform: translateY(-5px);
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.product-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.product-info {
-  padding: 20px;
-}
-
-.product-info h3 {
-  color: #1a1a2e;
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-}
-
-.product-info p {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.5;
+.products-coming-soon h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.2rem;
+  color: var(--forest);
+  letter-spacing: 3px;
   margin-bottom: 15px;
 }
 
-.product-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.products-coming-soon p {
+  color: var(--grey-text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-.product-price {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #e2b96f;
+.coming-soon-divider {
+  width: 50px;
+  height: 3px;
+  background: var(--gold);
+  margin: 25px auto;
+  border-radius: 3px;
+}
+
+.coming-soon-contact {
+  color: var(--forest) !important;
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
 }
 
 @media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: 1fr;
+  .products-coming-soon {
+    padding: 50px 20px;
   }
 }

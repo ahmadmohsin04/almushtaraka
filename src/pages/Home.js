@@ -2,41 +2,111 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 
 function Home() {
+  const stats = [
+    { number: '500+', label: 'Machines Sold' },
+    { number: '10+', label: 'Years Experience' },
+    { number: '200+', label: 'Happy Clients' },
+    { number: 'UAE', label: 'Based & Trusted' },
+  ];
+
+  const services = [
+    {
+      icon: '⚙️',
+      title: 'Industrial Machinery',
+      desc: 'Premium lathe machines, drill presses, and heavy industrial equipment sourced from top manufacturers.'
+    },
+    {
+      icon: '📄',
+      title: 'Transparent Agreements',
+      desc: 'Generate professional sales and lease agreements instantly with full payment schedules.'
+    },
+    {
+      icon: '💳',
+      title: 'Flexible Payment Plans',
+      desc: 'Customized installment plans tailored to your business needs with clear monthly schedules.'
+    },
+    {
+      icon: '✅',
+      title: 'Verified & Trusted',
+      desc: 'Every transaction backed by a formal signed agreement, protecting both buyer and seller.'
+    },
+  ];
+
   return (
     <div className="home">
-      <div className="hero">
+
+      {/* Hero */}
+      <section className="hero">
+        <div className="hero-bg-pattern"></div>
         <div className="hero-content">
-          <h1>Welcome to Al Mushtaraka</h1>
-          <p>Your trusted partner for quality products and transparent sales agreements.</p>
+          <div className="hero-tag">DIBBA INDUSTRIAL AREA, UAE</div>
+          <h1 className="hero-title">
+            INDUSTRIAL<br />
+            <span className="hero-title-accent">MACHINERY</span><br />
+            & TRADING
+          </h1>
+          <p className="hero-desc">
+            Al Mushtaraka Trading Company supplies premium industrial machinery and equipment across the UAE with professional sales agreements and flexible payment solutions.
+          </p>
           <div className="hero-buttons">
             <Link to="/products" className="btn-primary">View Products</Link>
-            <Link to="/agreement" className="btn-secondary">Create Agreement</Link>
+            <Link to="/agreement" className="btn-outline">Create Agreement</Link>
           </div>
         </div>
+        <div className="hero-stats">
+          {stats.map((s, i) => (
+            <div className="stat-item" key={i}>
+              <span className="stat-number">{s.number}</span>
+              <span className="stat-label">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="section-divider">
+        <span>WHAT WE OFFER</span>
       </div>
 
-      <div className="features">
-        <div className="feature-card">
-          <div className="feature-icon">🛒</div>
-          <h3>Quality Products</h3>
-          <p>Browse our catalog of carefully selected products at competitive prices.</p>
+      {/* Services */}
+      <section className="services">
+        <div className="services-grid">
+          {services.map((s, i) => (
+            <div className="service-card" key={i}>
+              <div className="service-icon">{s.icon}</div>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+            </div>
+          ))}
         </div>
-        <div className="feature-card">
-          <div className="feature-icon">📄</div>
-          <h3>Sales Agreements</h3>
-          <p>Generate professional sales agreements instantly with your details.</p>
+      </section>
+
+      {/* CTA Banner */}
+      <section className="cta-banner">
+        <div className="cta-content">
+          <h2>READY TO CREATE AN AGREEMENT?</h2>
+          <p>Generate a professional sales or lease agreement in minutes.</p>
+          <Link to="/agreement" className="btn-primary">Get Started →</Link>
         </div>
-        <div className="feature-card">
-          <div className="feature-icon">✍️</div>
-          <h3>E-Signature</h3>
-          <p>Sign your agreement digitally and save a copy for your records.</p>
+      </section>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <span className="brand-main">AL MUSHTARAKA</span>
+            <span className="brand-sub">TRADING COMPANY</span>
+          </div>
+          <div className="footer-info">
+            <p>📍 Dibba Industrial Area, UAE</p>
+            <p>👤 Arif Mukhtar Malik — Partner & Manager</p>
+          </div>
+          <div className="footer-copy">
+            <p>© {new Date().getFullYear()} Al Mushtaraka Trading Company. All rights reserved.</p>
+          </div>
         </div>
-        <div className="feature-card">
-          <div className="feature-icon">💳</div>
-          <h3>Payment Plans</h3>
-          <p>Flexible payment schedules tailored to your needs.</p>
-        </div>
-      </div>
+      </footer>
+
     </div>
   );
 }
