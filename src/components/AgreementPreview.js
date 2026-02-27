@@ -5,6 +5,7 @@ import html2canvas from 'html2canvas';
 import './AgreementPreview.css';
 import sellerSignature from '../assets/seller-signature.jpg';
 import { supabase } from '../supabaseClient';
+import logo from '../assets/logo.jpg';
 
 function AgreementPreview({ formData, agreementType, subtotal, vat, total, remainingBalance, monthlyInstallment, paymentSchedule, onBack }) {
 
@@ -136,8 +137,11 @@ const generatePDF = async () => {
         {/* Header */}
         <div className="preview-header">
           <div className="preview-header-left">
-            <h1>ALMUSHTARAKA TRADING COMPANY</h1>
-            <p>DIBBA INDUSTRIAL AREA</p>
+            <img src={logo} alt="Al Mushtaraka Logo" className="agreement-logo" />
+            <div>
+              <h1>ALMUSHTARAKA TRADING COMPANY</h1>
+              <p>DIBBA INDUSTRIAL AREA</p>
+            </div>
           </div>
           <div className="preview-header-right">
             <div className="preview-copy-badge">

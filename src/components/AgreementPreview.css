@@ -310,3 +310,16 @@
     gap: 5px;
   }
 }
+
+.agreement-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.preview-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
