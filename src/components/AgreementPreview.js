@@ -122,7 +122,7 @@ try {
   pdf.text('DIBBA INDUSTRIAL AREA, UAE', margin + 22, y + 12);
 
   // Badge
-const badgeText = agreementType === 'sale' ? 'CUSTOMER COPY' : 'ORIGINAL';
+const badgeText = agreementType === 'sale' ? 'CUSTOMER COPY' : 'CUSTOMER COPY';
 const badgeWidth = 40;
 const badgeX = pageWidth - margin - badgeWidth;
 pdf.setFillColor(200, 169, 110);
@@ -352,8 +352,8 @@ y += 12;
   addSectionTitle('SIGNATURES');
   y += 5;
 
-  const sig1X = margin;
-  const sig2X = pageWidth / 2 + 5;
+const sig1X = margin;
+const sig2X = pageWidth - margin - 60;
 
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'bold');
@@ -381,8 +381,8 @@ y += 12;
   // Buyer signature
   if (buyerSigRef.current && !buyerSigRef.current.isEmpty()) {
     const buyerSigData = buyerSigRef.current.toDataURL('image/png');
-    pdf.addImage(buyerSigData, 'PNG', sig2X, y, 50, 20);
-  }
+    pdf.addImage(buyerSigData, 'PNG', sig2X, y, 55, 20);  
+}
 
   y += 25;
   pdf.setDrawColor(200, 169, 110);
@@ -434,9 +434,9 @@ y += 12;
             </div>
           </div>
           <div className="preview-header-right">
-            <div className="preview-copy-badge">
-              {agreementType === 'sale' ? 'CUSTOMER COPY' : 'ORIGINAL'}
-            </div>
+          <div className="preview-copy-badge">
+            ORIGINAL
+          </div>
           </div>
         </div>
 
