@@ -103,9 +103,11 @@
   display: block;
   margin-top: 5px;
 }
+
 .hide-on-print {
   display: none !important;
 }
+
 .preview-title {
   text-align: center;
   margin: 15px 0;
@@ -187,6 +189,7 @@
   margin: 20px 0;
   padding-top: 15px;
   border-top: 1px solid #eee;
+  page-break-inside: avoid;
 }
 
 .section-title {
@@ -201,6 +204,7 @@
   margin: 8px 0;
   line-height: 1.6;
   color: #333;
+  page-break-inside: avoid;
 }
 
 .preview-signatures {
@@ -209,6 +213,7 @@
   margin-top: 30px;
   padding-top: 20px;
   border-top: 2px solid #1a1a2e;
+  page-break-inside: avoid;
 }
 
 .sig-box {
@@ -249,68 +254,6 @@
   color: #e2b96f;
 }
 
-@media (max-width: 768px) {
-  .preview-wrapper {
-    overflow-x: hidden;
-    width: 100%;
-  }
-
-  .preview-document {
-    width: 100%;
-    padding: 20px 15px;
-    font-size: 0.75rem;
-    overflow-x: hidden;
-  }
-
-  .preview-actions-top {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-    text-align: center;
-  }
-
-  .btn-generate-pdf {
-    width: 100%;
-  }
-
-  .btn-back-preview {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .preview-parties {
-    flex-direction: column;
-    gap: 20px;
-    padding: 15px;
-  }
-
-  .preview-table {
-    display: block;
-    overflow-x: auto;
-    font-size: 0.75rem;
-  }
-
-  .preview-signatures {
-    flex-direction: column;
-    gap: 25px;
-  }
-
-  .sig-canvas {
-    width: 100% !important;
-    max-width: 300px;
-  }
-
-  .preview-header {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .preview-ref-row {
-    flex-direction: column;
-    gap: 5px;
-  }
-}
-
 .agreement-logo {
   width: 60px;
   height: 60px;
@@ -322,4 +265,133 @@
   display: flex;
   align-items: center;
   gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .preview-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+    padding: 0;
+  }
+
+  .preview-actions-top {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    text-align: center;
+    padding: 0 0 15px 0;
+  }
+
+  .btn-generate-pdf {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .btn-back-preview {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .preview-document {
+    width: 100%;
+    min-width: unset;
+    padding: 20px 15px;
+    font-size: 0.78rem;
+    overflow-x: hidden;
+    border-radius: 8px;
+  }
+
+  .preview-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .preview-header-left {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .preview-header-left h1 {
+    font-size: 0.85rem;
+  }
+
+  .preview-copy-badge {
+    font-size: 0.7rem;
+    padding: 5px 10px;
+  }
+
+  .preview-title h2 {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .preview-ref-row {
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.8rem;
+  }
+
+  .preview-parties {
+    flex-direction: column;
+    gap: 15px;
+    padding: 12px;
+  }
+
+  .preview-party p {
+    font-size: 0.8rem;
+  }
+
+  .party-label {
+    font-size: 0.85rem !important;
+  }
+
+  .preview-table {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.75rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .preview-table th,
+  .preview-table td {
+    padding: 6px 7px;
+    white-space: nowrap;
+  }
+
+  .preview-section p {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .section-title {
+    font-size: 0.9rem !important;
+  }
+
+  .term-item {
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .preview-signatures {
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .sig-box p {
+    font-size: 0.82rem;
+  }
+
+  .sig-canvas {
+    width: 100% !important;
+    max-width: 280px;
+    height: 80px !important;
+  }
+
+  .agreement-logo {
+    width: 40px;
+    height: 40px;
+  }
 }
