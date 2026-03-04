@@ -48,24 +48,28 @@ function Admin() {
   };
 
   if (!authenticated) {
-    return (
-      <div className="admin-login">
-        <div className="login-card">
-          <div className="login-icon">🔐</div>
-          <h2>Admin Access</h2>
-          <p>Enter your password to continue</p>
-          <input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-          />
-          {error && <p className="login-error">{error}</p>}
-          <button onClick={handleLogin}>Login</button>
-        </div>
+return (
+  <div className="admin-login">
+    <div className="login-card">
+      <div className="login-icon">🔐</div>
+      <p className="login-brand">Al Mushtaraka Trading Co.</p>
+      <h2>ADMIN PANEL</h2>
+      <p>Enter your credentials to access the dashboard</p>
+      <div className="login-input-wrapper">
+        <span className="login-input-icon">🔑</span>
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+        />
       </div>
-    );
+      {error && <p className="login-error">⚠️ {error}</p>}
+      <button onClick={handleLogin}>Access Dashboard →</button>
+    </div>
+  </div>
+);
   }
 
   if (selected) {
