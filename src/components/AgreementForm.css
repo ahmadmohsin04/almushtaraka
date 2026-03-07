@@ -285,3 +285,62 @@
     overflow-x: auto;
   }
 }
+
+.buyer-block {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid var(--grey-mid);
+}
+
+.buyer-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.buyer-number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--forest);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-remove-buyer {
+  background: none;
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-remove-buyer:hover {
+  background: #ff4444;
+  color: white;
+}
+
+.btn-add-buyer {
+  background: none;
+  border: 2px dashed var(--gold);
+  color: var(--gold);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: bold;
+  transition: all 0.3s;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.btn-add-buyer:hover {
+  background: var(--gold);
+  color: white;
+}

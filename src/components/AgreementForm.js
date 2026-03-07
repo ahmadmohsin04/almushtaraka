@@ -16,14 +16,12 @@ const getMonthName = (date) => {
 };
 
 function AgreementForm({ agreementType }) {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     refNumber: generateRefNumber(agreementType),
     date: new Date().toISOString().split('T')[0],
-    buyerCompany: '',
-    licenseNumber: '',
-    representativeName: '',
-    eid: '',
-    mobile: '',
+    buyers: [
+      { buyerCompany: '', licenseNumber: '', representativeName: '', eid: '', mobile: '' }
+    ],
     guarantorName: '',
     guarantorEid: '',
     guarantorMobile: '',
@@ -55,6 +53,24 @@ function AgreementForm({ agreementType }) {
     const updated = formData.products.filter((_, i) => i !== index);
     setFormData({ ...formData, products: updated });
   };
+
+  const handleBuyerChange = (index, field, value) => {
+  const updated = [...formData.buyers];
+  updated[index][field] = value;
+  setFormData({ ...formData, buyers: updated });
+};
+
+const addBuyer = () => {
+  setFormData({
+    ...formData,
+    buyers: [...formData.buyers, { buyerCompany: '', licenseNumber: '', representativeName: '', eid: '', mobile: '' }],
+  });
+};
+
+const removeBuyer = (index) => {
+  const updated = formData.buyers.filter((_, i) => i !== index);
+  setFormData({ ...formData, buyers: updated });
+};
 
   // --- All calculations here, before any return ---
   const subtotal = formData.products.reduce((sum, p) => {
@@ -145,33 +161,50 @@ const generatePaymentSchedule = () => {
       </div>
 
       {/* Buyer Info */}
-      <div className="form-section">
-        <h3>Buyer Information</h3>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Company Name</label>
-            <input type="text" name="buyerCompany" placeholder="e.g. PAK TOWER MECHANIC" value={formData.buyerCompany} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>License Number</label>
-            <input type="text" name="licenseNumber" placeholder="e.g. CN-6042889" value={formData.licenseNumber} onChange={handleChange} />
-          </div>
+{/* Buyer Info */}
+<div className="form-section">
+  <h3>Buyer Information</h3>
+  {formData.buyers.map((buyer, index) => (
+    <div className="buyer-block" key={index}>
+      <div className="buyer-block-header">
+        <span className="buyer-number">Buyer {index + 1}</span>
+        {formData.buyers.length > 1 && (
+          <button className="btn-remove-buyer" onClick={() => removeBuyer(index)}>✕ Remove</button>
+        )}
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label>Company Name</label>
+          <input type="text" placeholder="e.g. PAK TOWER MECHANIC" value={buyer.buyerCompany}
+            onChange={(e) => handleBuyerChange(index, 'buyerCompany', e.target.value)} />
         </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Representative Name</label>
-            <input type="text" name="representativeName" placeholder="Full name" value={formData.representativeName} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>EID / Passport Number</label>
-            <input type="text" name="eid" placeholder="e.g. 784-1995-7170468-5" value={formData.eid} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>Mobile Number</label>
-            <input type="text" name="mobile" placeholder="e.g. +971 52 168 2976" value={formData.mobile} onChange={handleChange} />
-          </div>
+        <div className="form-group">
+          <label>License Number</label>
+          <input type="text" placeholder="e.g. CN-6042889" value={buyer.licenseNumber}
+            onChange={(e) => handleBuyerChange(index, 'licenseNumber', e.target.value)} />
         </div>
       </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label>Representative Name</label>
+          <input type="text" placeholder="Full name" value={buyer.representativeName}
+            onChange={(e) => handleBuyerChange(index, 'representativeName', e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>EID / Passport Number</label>
+          <input type="text" placeholder="e.g. 784-1995-7170468-5" value={buyer.eid}
+            onChange={(e) => handleBuyerChange(index, 'eid', e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Mobile Number</label>
+          <input type="text" placeholder="e.g. +971 52 168 2976" value={buyer.mobile}
+            onChange={(e) => handleBuyerChange(index, 'mobile', e.target.value)} />
+        </div>
+      </div>
+    </div>
+  ))}
+  <button className="btn-add-buyer" onClick={addBuyer}>+ Add Another Buyer</button>
+</div>
 
       {/* Guarantor - Lease Only */}
       {agreementType === 'lease' && (
