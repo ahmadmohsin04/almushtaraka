@@ -28,6 +28,8 @@ const [formData, setFormData] = useState({
     products: [{ name: '', qty: 1, unit: 'NOS', rate: '' }],
     tokenAmount: '',
     installmentMonths: '',
+    extraPaymentTerms: [],      // ADD THIS
+    extraStandardTerms: [],     // ADD THIS
   });
 
   const [showPreview, setShowPreview] = useState(false);
@@ -70,6 +72,30 @@ const addBuyer = () => {
 const removeBuyer = (index) => {
   const updated = formData.buyers.filter((_, i) => i !== index);
   setFormData({ ...formData, buyers: updated });
+};
+
+const addPaymentTerm = () => {
+  setFormData({ ...formData, extraPaymentTerms: [...formData.extraPaymentTerms, ''] });
+};
+const removePaymentTerm = (index) => {
+  setFormData({ ...formData, extraPaymentTerms: formData.extraPaymentTerms.filter((_, i) => i !== index) });
+};
+const handlePaymentTermChange = (index, value) => {
+  const updated = [...formData.extraPaymentTerms];
+  updated[index] = value;
+  setFormData({ ...formData, extraPaymentTerms: updated });
+};
+
+const addStandardTerm = () => {
+  setFormData({ ...formData, extraStandardTerms: [...formData.extraStandardTerms, ''] });
+};
+const removeStandardTerm = (index) => {
+  setFormData({ ...formData, extraStandardTerms: formData.extraStandardTerms.filter((_, i) => i !== index) });
+};
+const handleStandardTermChange = (index, value) => {
+  const updated = [...formData.extraStandardTerms];
+  updated[index] = value;
+  setFormData({ ...formData, extraStandardTerms: updated });
 };
 
   // --- All calculations here, before any return ---
@@ -135,6 +161,8 @@ const generatePaymentSchedule = () => {
         remainingBalance={remainingBalance}
         monthlyInstallment={monthlyInstallment}
         paymentSchedule={paymentSchedule}
+        extraPaymentTerms={formData.extraPaymentTerms}
+        extraStandardTerms={formData.extraStandardTerms}
         onBack={() => setShowPreview(false)}
       />
     );
@@ -172,18 +200,20 @@ const generatePaymentSchedule = () => {
           <button className="btn-remove-buyer" onClick={() => removeBuyer(index)}>✕ Remove</button>
         )}
       </div>
-      <div className="form-row">
-        <div className="form-group">
-          <label>Company Name</label>
-          <input type="text" placeholder="e.g. PAK TOWER MECHANIC" value={buyer.buyerCompany}
-            onChange={(e) => handleBuyerChange(index, 'buyerCompany', e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label>License Number</label>
-          <input type="text" placeholder="e.g. CN-6042889" value={buyer.licenseNumber}
-            onChange={(e) => handleBuyerChange(index, 'licenseNumber', e.target.value)} />
-        </div>
-      </div>
+<div className="form-row">
+  <div className="form-group">
+    <label>Company Name</label>
+    <input type="text" placeholder="e.g. PAK TOWER MECHANIC" value={buyer.buyerCompany}
+      onChange={(e) => handleBuyerChange(index, 'buyerCompany', e.target.value)} />
+  </div>
+  {index === 0 && (
+    <div className="form-group">
+      <label>License Number</label>
+      <input type="text" placeholder="e.g. CN-6042889" value={buyer.licenseNumber}
+        onChange={(e) => handleBuyerChange(index, 'licenseNumber', e.target.value)} />
+    </div>
+  )}
+</div>
       <div className="form-row">
         <div className="form-group">
           <label>Representative Name</label>
@@ -359,7 +389,41 @@ const generatePaymentSchedule = () => {
           </div>
         )}
       </div>
+{/* Extra Payment Terms */}
+<div className="form-section">
+  <h3>Additional Payment Terms</h3>
+  {formData.extraPaymentTerms.map((term, index) => (
+    <div className="extra-term-row" key={index}>
+      <span className="term-prefix">{['V','VI','VII','VIII','IX','X'][index]}-</span>
+      <input
+        type="text"
+        placeholder="Enter additional payment term..."
+        value={term}
+        onChange={(e) => handlePaymentTermChange(index, e.target.value)}
+      />
+      <button className="btn-remove-term" onClick={() => removePaymentTerm(index)}>✕</button>
+    </div>
+  ))}
+  <button className="btn-add-term" onClick={addPaymentTerm}>+ Add Payment Term</button>
+</div>
 
+{/* Extra Standard Terms */}
+<div className="form-section">
+  <h3>Additional Standard Terms & Conditions</h3>
+  {formData.extraStandardTerms.map((term, index) => (
+    <div className="extra-term-row" key={index}>
+      <span className="term-prefix">{String(index + 7).padStart(2, '0')}-</span>
+      <input
+        type="text"
+        placeholder="Enter additional standard term..."
+        value={term}
+        onChange={(e) => handleStandardTermChange(index, e.target.value)}
+      />
+      <button className="btn-remove-term" onClick={() => removeStandardTerm(index)}>✕</button>
+    </div>
+  ))}
+  <button className="btn-add-term" onClick={addStandardTerm}>+ Add Standard Term</button>
+</div>
       <div className="form-actions">
         <button className="btn-preview" onClick={() => setShowPreview(true)}>
           Preview & Sign Agreement →

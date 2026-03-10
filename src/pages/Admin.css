@@ -414,3 +414,42 @@
     padding: 20px 15px;
   }
 }
+
+
+.buyer-detail-block {
+  border: 1px solid var(--grey-mid);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.buyer-detail-label {
+  font-weight: 800;
+  color: var(--forest);
+  font-size: 1rem;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 8px;
+}
+
+.buyers-count {
+  background: var(--forest);
+  color: var(--cream);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.detail-term {
+  margin: 5px 0;
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.buyer-detail-block .detail-grid {
+  margin-top: 10px;
+}

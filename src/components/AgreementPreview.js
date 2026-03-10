@@ -6,9 +6,10 @@ import sellerSignature from '../assets/seller-signature.jpg';
 import { supabase } from '../supabaseClient';
 import logoBase64 from '../assets/logo.jpg';
 
-function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliveryAmount, remainingBalance, monthlyInstallment, paymentSchedule, onBack }) {
+function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliveryAmount, remainingBalance, monthlyInstallment, paymentSchedule,extraPaymentTerms, extraStandardTerms, onBack }) {
 
   const buyerSigRef = useRef([]);
+  const isGenerating = useRef(false);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -61,10 +62,12 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
       }
     } catch (err) {
       console.error('Unexpected error:', err);
-    }
+    } 
   };
 
 const generatePDF = async () => {
+    if (isGenerating.current) return;  // ADD THIS
+      isGenerating.current = true;       // ADD THIS
     const clearBtns = document.querySelectorAll('.hide-on-pdf');
     clearBtns.forEach(btn => btn.style.display = 'none');
 
@@ -75,12 +78,23 @@ const generatePDF = async () => {
     const contentWidth = pageWidth - margin * 2;
     let y = margin;
 
-    const checkPageBreak = (neededSpace = 10) => {
-      if (y + neededSpace > pageHeight - margin) {
-        pdf.addPage();
-        y = margin;
-      }
-    };
+let currentPage = 1;
+let signaturesStarted = false;
+
+const checkPageBreak = (neededSpace = 10) => {
+  const bottomLimit = signaturesStarted 
+    ? pageHeight - margin
+    : pageHeight - 38;  // matches footerY - a little buffer
+
+  if (y + neededSpace > bottomLimit) {
+    if (!signaturesStarted) {
+      drawFooterSignatures(currentPage);
+    }
+    pdf.addPage();
+    currentPage++;
+    y = margin;
+  }
+};
 
     const addLine = (color = [220, 216, 207]) => {
       checkPageBreak(5);
@@ -100,6 +114,63 @@ const generatePDF = async () => {
       pdf.text(title, margin + 3, y + 1);
       y += 8;
     };
+
+const drawFooterSignatures = (pageNum) => {
+  const footerY = pageHeight - 35;  // absolute from bottom, not relative to margin
+  const buyers = formData.buyers;
+  const slotWidth = contentWidth / buyers.length;
+  // Gold divider line
+  pdf.setDrawColor(200, 169, 110);
+  pdf.setLineWidth(0.4);
+  pdf.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
+  pdf.setLineWidth(0.2);
+
+  // "BUYER INITIALS" label on left
+  pdf.setFontSize(6.5);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(200, 169, 110);
+  pdf.text('BUYER INITIALS', margin, footerY - 1);
+
+  // Page number on right
+  pdf.setFontSize(7);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(180, 180, 180);
+  pdf.text(`Page ${pageNum}`, pageWidth - margin, footerY - 1, { align: 'right' });
+
+  buyers.forEach((buyer, index) => {
+    const slotCenterX = margin + (index * slotWidth) + slotWidth / 2;
+    const sigX = margin + (index * slotWidth) + 4;
+
+// Buyer label - left aligned
+pdf.setFontSize(7);
+pdf.setFont('helvetica', 'bold');
+pdf.setTextColor(28, 43, 26);
+pdf.text(buyers.length > 1 ? `BUYER ${index + 1}:` : 'BUYER:', sigX, footerY + 4);
+
+// Buyer name - left aligned
+pdf.setFont('helvetica', 'normal');
+pdf.setTextColor(100, 100, 100);
+pdf.text(buyer.representativeName || '_______________', sigX, footerY + 8);
+
+    // Signature image - centered
+    const ref = buyerSigRef.current[index];
+    if (ref && !ref.isEmpty()) {
+      const sigImgWidth = 28;
+      pdf.addImage(ref.toDataURL('image/png'), 'PNG', slotCenterX - sigImgWidth / 2, footerY + 10, sigImgWidth, 10);
+    }
+
+    // Signature line - centered
+    pdf.setDrawColor(200, 169, 110);
+    const lineHalf = (slotWidth - 10) / 2;
+    pdf.line(slotCenterX - lineHalf, footerY + 21, slotCenterX + lineHalf, footerY + 21);
+
+    // Vertical divider between buyers
+    if (index < buyers.length - 1) {
+      pdf.setDrawColor(220, 216, 207);
+      pdf.line(margin + (index + 1) * slotWidth, footerY - 4, margin + (index + 1) * slotWidth, footerY + 22);
+    }
+  });
+};
 
     // ── LOGO + HEADER ──
     try {
@@ -157,6 +228,13 @@ const generatePDF = async () => {
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(200, 169, 110);
+    // Border around seller block
+// Border around seller block
+pdf.setDrawColor(28, 43, 26);
+pdf.setLineWidth(0.25);
+pdf.roundedRect(col1 - 2, sellerStartY - 3, (pageWidth / 2) - 40, 28, 2, 2, 'S');
+pdf.setLineWidth(0.2);
+    y +=1;
     pdf.text('SELLER:-', col1, y);
     y += 5;
     pdf.setFont('helvetica', 'bold');
@@ -216,8 +294,6 @@ const generatePDF = async () => {
       leftY += 5;
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(80, 80, 80);
-      pdf.text(`License: ${leftBuyer.licenseNumber || '___________________'}`, col1, leftY);
-      leftY += 5;
       pdf.text(`Rep: ${leftBuyer.representativeName || '___________________'}`, col1, leftY);
       leftY += 5;
       pdf.text(`EID: ${leftBuyer.eid || '___________________'}`, col1, leftY);
@@ -237,8 +313,6 @@ const generatePDF = async () => {
         rightY += 5;
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(80, 80, 80);
-        pdf.text(`License: ${rightBuyer.licenseNumber || '___________________'}`, col2, rightY, { align: 'right' });
-        rightY += 5;
         pdf.text(`Rep: ${rightBuyer.representativeName || '___________________'}`, col2, rightY, { align: 'right' });
         rightY += 5;
         pdf.text(`EID: ${rightBuyer.eid || '___________________'}`, col2, rightY, { align: 'right' });
@@ -339,41 +413,52 @@ const generatePDF = async () => {
         pdf.text(l, margin, y);
         y += 5;
       });
-      y += 1;
     });
 
-    y += 3;
-
-    // ── PAYMENT SCHEDULE ──
-    if (paymentSchedule.length > 0) {
-      addSectionTitle('PAYMENT SCHEDULE');
-      y += 2;
-
-      const schedColX = [margin, margin + 20, margin + 70, margin + 120];
-      pdf.setFillColor(45, 74, 42);
-      pdf.rect(margin, y - 4, contentWidth, 8, 'F');
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(245, 236, 215);
-      ['MONTH', 'PERIOD', 'DUE DATE', 'AMOUNT (AED)'].forEach((h, i) => pdf.text(h, schedColX[i] + 1, y + 1));
-      y += 7;
-
-      paymentSchedule.forEach((row, i) => {
-        checkPageBreak(8);
-        if (i % 2 === 0) {
-          pdf.setFillColor(247, 244, 239);
-          pdf.rect(margin, y - 4, contentWidth, 7, 'F');
-        }
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(30, 43, 26);
-        [String(row.month), row.label, row.dueDate, `AED ${row.amount}`]
-          .forEach((d, j) => pdf.text(d, schedColX[j] + 1, y));
-        y += 7;
-      });
+    // Extra payment terms
+if (extraPaymentTerms && extraPaymentTerms.length > 0) {
+  const romans = ['V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  extraPaymentTerms.filter(t => t.trim()).forEach((term, index) => {
+    pdf.splitTextToSize(`${romans[index]}- ${term}`, contentWidth).forEach(l => {
+      checkPageBreak(6);
+      pdf.text(l, margin, y);
       y += 5;
-    }
+    });
+  });
+}
 
+// ── PAYMENT SCHEDULE ──
+if (paymentSchedule.length > 0) {
+  addSectionTitle('PAYMENT SCHEDULE');
+  y += 2;
+
+  const schedColX = [margin, margin + 20, margin + 70, margin + 120];
+  
+  // Draw table header
+  checkPageBreak(15);
+  pdf.setFillColor(45, 74, 42);
+  pdf.rect(margin, y - 4, contentWidth, 8, 'F');
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(245, 236, 215);
+  ['MONTH', 'PERIOD', 'DUE DATE', 'AMOUNT (AED)'].forEach((h, i) => pdf.text(h, schedColX[i] + 1, y + 1));
+  y += 7;
+
+  paymentSchedule.forEach((row, i) => {
+    checkPageBreak(10);
+    if (i % 2 === 0) {
+      pdf.setFillColor(247, 244, 239);
+      pdf.rect(margin, y - 4, contentWidth, 7, 'F');
+    }
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(30, 43, 26);
+    [String(row.month), row.label, row.dueDate, `AED ${row.amount}`]
+      .forEach((d, j) => pdf.text(d, schedColX[j] + 1, y));
+    y += 7;
+  });
+  y += 5;
+}
     // ── TERMS & CONDITIONS ──
     addSectionTitle('STANDARD TERMS & CONDITIONS');
     y += 3;
@@ -394,10 +479,24 @@ const generatePDF = async () => {
         pdf.text(l, margin, y);
         y += 5;
       });
-      y += 2;
     });
 
+    // Extra standard terms
+if (extraStandardTerms && extraStandardTerms.length > 0) {
+  extraStandardTerms.filter(t => t.trim()).forEach((term, index) => {
+    pdf.splitTextToSize(`${String(index + 7).padStart(2, '0')}- ${term}`, contentWidth).forEach(l => {
+      checkPageBreak(6);
+      pdf.setFontSize(8.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(60, 60, 60);
+      pdf.text(l, margin, y);
+      y += 5;
+    });
+  });
+}
+
     // ── SIGNATURES ──
+    signaturesStarted = true;
     checkPageBreak(70);
     y += 5;
     addLine([200, 169, 110]);
@@ -487,10 +586,14 @@ const generatePDF = async () => {
 
       y = rowStartY + 52;
     }
+    // DO NOT draw footer on last page — it has the full signatures section
+// Footer was already drawn by checkPageBreak on all previous pages
 
     pdf.save(`Agreement-${formData.refNumber}.pdf`);
-    clearBtns.forEach(btn => btn.style.display = 'block');
+    clearBtns.forEach(btn => btn.style.display = 'block');  
     await saveToDatabase();
+    isGenerating.current = false;  // ADD THIS
+
   };
 
   return (
@@ -540,7 +643,7 @@ const generatePDF = async () => {
     <div className="preview-party" key={index}>
       <p className="party-label">{formData.buyers.length > 1 ? `BUYER ${index + 1}:-` : 'BUYER:-'}</p>
       <p><strong>{buyer.buyerCompany || '___________________'}</strong></p>
-      <p>License Number: {buyer.licenseNumber || '___________________'}</p>
+      {index === 0 && <p>License Number: {buyer.licenseNumber || '___________________'}</p>}
       <p>Representative: {buyer.representativeName || '___________________'}</p>
       <p>ID#: {buyer.eid || '___________________'}</p>
       <p>Mobile: {buyer.mobile || '___________________'}</p>
@@ -590,13 +693,16 @@ const generatePDF = async () => {
         </table>
 
         {/* Payment Terms */}
-        <div className="preview-section">
-          <p className="section-title">Payment Terms:-</p>
-          <p>I- At the time of booking / Token Money, CASH AED = {formData.tokenAmount}/-</p>
-          <p>II- At the time of delivery of goods, AED: {deliveryAmount.toFixed(2)}/-</p>
-          <p>III- Remaining balance AED {remainingBalance.toFixed(2)} to be paid in {formData.installmentMonths} monthly installments of AED {monthlyInstallment.toFixed(2)} per month.</p>
-          <p>IV- Installments start from {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is 5th of each month.</p>
-        </div>
+<div className="preview-section">
+  <p className="section-title">Payment Terms:-</p>
+  <p>I- At the time of booking / Token Money, CASH AED = {formData.tokenAmount}/-</p>
+  <p>II- At the time of delivery of goods, AED: {deliveryAmount.toFixed(2)}/-</p>
+  <p>III- Remaining balance AED {remainingBalance.toFixed(2)} to be paid in {formData.installmentMonths} monthly installments of AED {monthlyInstallment.toFixed(2)} per month.</p>
+  <p>IV- Installments start from {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is 5th of each month.</p>
+  {extraPaymentTerms && extraPaymentTerms.filter(t => t.trim()).map((term, index) => (
+    <p key={index}>{['V','VI','VII','VIII','IX','X'][index]}- {term}</p>
+  ))}
+</div>
 
         {/* Payment Schedule */}
         {paymentSchedule.length > 0 && (
@@ -626,14 +732,19 @@ const generatePDF = async () => {
         )}
 
         {/* Terms and Conditions */}
-        <div className="preview-section">
-          <p className="section-title">Standard Terms & Conditions:-</p>
-          {terms.map((term, i) => (
-            <p key={i} className="term-item">
-              <strong>{String(i + 1).padStart(2, '0')}-</strong> {term}
-            </p>
-          ))}
-        </div>
+<div className="preview-section">
+  <p className="section-title">Standard Terms & Conditions:-</p>
+  {terms.map((term, i) => (
+    <p key={i} className="term-item">
+      <strong>{String(i + 1).padStart(2, '0')}-</strong> {term}
+    </p>
+  ))}
+  {extraStandardTerms && extraStandardTerms.filter(t => t.trim()).map((term, index) => (
+    <p key={index} className="term-item">
+      <strong>{String(index + 7).padStart(2, '0')}-</strong> {term}
+    </p>
+  ))}
+</div>
 
         {/* Guarantor - Lease Only */}
         {agreementType === 'lease' && (

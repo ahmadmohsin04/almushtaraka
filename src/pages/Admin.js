@@ -48,31 +48,42 @@ function Admin() {
   };
 
   if (!authenticated) {
-return (
-  <div className="admin-login">
-    <div className="login-card">
-      <div className="login-icon">🔐</div>
-      <p className="login-brand">Al Mushtaraka Trading Co.</p>
-      <h2>ADMIN PANEL</h2>
-      <p>Enter your credentials to access the dashboard</p>
-      <div className="login-input-wrapper">
-        <span className="login-input-icon">🔑</span>
-        <input
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-        />
+    return (
+      <div className="admin-login">
+        <div className="login-card">
+          <div className="login-icon">🔐</div>
+          <p className="login-brand">Al Mushtaraka Trading Co.</p>
+          <h2>ADMIN PANEL</h2>
+          <p>Enter your credentials to access the dashboard</p>
+          <div className="login-input-wrapper">
+            <span className="login-input-icon">🔑</span>
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            />
+          </div>
+          {error && <p className="login-error">⚠️ {error}</p>}
+          <button onClick={handleLogin}>Access Dashboard →</button>
+        </div>
       </div>
-      {error && <p className="login-error">⚠️ {error}</p>}
-      <button onClick={handleLogin}>Access Dashboard →</button>
-    </div>
-  </div>
-);
+    );
   }
 
   if (selected) {
+    // Use buyers array if available, fallback to legacy single buyer fields
+    const buyers = selected.buyers && selected.buyers.length > 0
+      ? selected.buyers
+      : [{
+          buyerCompany: selected.buyer_company,
+          licenseNumber: selected.license_number,
+          representativeName: selected.representative_name,
+          eid: selected.eid,
+          mobile: selected.mobile,
+        }];
+
     return (
       <div className="page">
         <div className="admin-detail-header">
@@ -83,6 +94,8 @@ return (
         </div>
 
         <div className="detail-card">
+
+          {/* Agreement Info */}
           <div className="detail-section">
             <h3>Agreement Info</h3>
             <div className="detail-grid">
@@ -93,17 +106,24 @@ return (
             </div>
           </div>
 
+          {/* Buyers - one block per buyer */}
           <div className="detail-section">
-            <h3>Buyer Information</h3>
-            <div className="detail-grid">
-              <div><label>Company</label><p>{selected.buyer_company}</p></div>
-              <div><label>License Number</label><p>{selected.license_number}</p></div>
-              <div><label>Representative</label><p>{selected.representative_name}</p></div>
-              <div><label>EID / Passport</label><p>{selected.eid}</p></div>
-              <div><label>Mobile</label><p>{selected.mobile}</p></div>
-            </div>
+            <h3>Buyer Information {buyers.length > 1 ? `(${buyers.length} Buyers)` : ''}</h3>
+            {buyers.map((buyer, index) => (
+              <div key={index} className={buyers.length > 1 ? 'buyer-detail-block' : ''}>
+                {buyers.length > 1 && <p className="buyer-detail-label">Buyer {index + 1}</p>}
+                <div className="detail-grid">
+                  <div><label>Company</label><p>{buyer.buyerCompany || '—'}</p></div>
+                  {index === 0 && <div><label>License Number</label><p>{buyer.licenseNumber || '—'}</p></div>}
+                  <div><label>Representative</label><p>{buyer.representativeName || '—'}</p></div>
+                  <div><label>EID / Passport</label><p>{buyer.eid || '—'}</p></div>
+                  <div><label>Mobile</label><p>{buyer.mobile || '—'}</p></div>
+                </div>
+              </div>
+            ))}
           </div>
 
+          {/* Guarantor - Lease Only */}
           {selected.agreement_type === 'lease' && (
             <div className="detail-section">
               <h3>Guarantor Information</h3>
@@ -115,6 +135,7 @@ return (
             </div>
           )}
 
+          {/* Products */}
           <div className="detail-section">
             <h3>Products</h3>
             <table className="admin-table">
@@ -143,6 +164,7 @@ return (
             </table>
           </div>
 
+          {/* Payment Summary */}
           <div className="detail-section">
             <h3>Payment Summary</h3>
             <div className="detail-grid">
@@ -157,6 +179,7 @@ return (
             </div>
           </div>
 
+          {/* Payment Schedule */}
           {selected.payment_schedule && selected.payment_schedule.length > 0 && (
             <div className="detail-section">
               <h3>Payment Schedule</h3>
@@ -182,6 +205,31 @@ return (
               </table>
             </div>
           )}
+
+          {/* Extra Payment Terms */}
+          {selected.extra_payment_terms && selected.extra_payment_terms.length > 0 && (
+            <div className="detail-section">
+              <h3>Additional Payment Terms</h3>
+              {selected.extra_payment_terms.map((term, i) => (
+                <p key={i} className="detail-term">
+                  <strong>{['V','VI','VII','VIII','IX','X'][i]}-</strong> {term}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* Extra Standard Terms */}
+          {selected.extra_standard_terms && selected.extra_standard_terms.length > 0 && (
+            <div className="detail-section">
+              <h3>Additional Standard Terms</h3>
+              {selected.extra_standard_terms.map((term, i) => (
+                <p key={i} className="detail-term">
+                  <strong>{String(i + 7).padStart(2, '0')}-</strong> {term}
+                </p>
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
     );
@@ -208,7 +256,7 @@ return (
           <p>Lease Agreements</p>
         </div>
         <div className="stat-card">
-          <h3>AED {agreements.reduce((sum, a) => sum + parseFloat(a.total || 0), 0).toLocaleString('en', {minimumFractionDigits: 2})}</h3>
+          <h3>AED {agreements.reduce((sum, a) => sum + parseFloat(a.total || 0), 0).toLocaleString('en', { minimumFractionDigits: 2 })}</h3>
           <p>Total Value</p>
         </div>
       </div>
@@ -227,7 +275,7 @@ return (
             <tr>
               <th>Ref Number</th>
               <th>Type</th>
-              <th>Buyer</th>
+              <th>Buyer(s)</th>
               <th>Date</th>
               <th>Total (AED)</th>
               <th>Action</th>
@@ -242,7 +290,12 @@ return (
                     {a.agreement_type === 'sale' ? 'Sale' : 'Lease'}
                   </span>
                 </td>
-                <td>{a.buyer_company}</td>
+                <td>
+                  {a.buyers && a.buyers.length > 1
+                    ? <span>{a.buyer_company} <span className="buyers-count">+{a.buyers.length - 1} more</span></span>
+                    : a.buyer_company
+                  }
+                </td>
                 <td>{a.date}</td>
                 <td>{parseFloat(a.total).toFixed(2)}</td>
                 <td>
@@ -251,7 +304,7 @@ return (
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan="6" style={{textAlign:'center', color:'#999'}}>No agreements found.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: '#999' }}>No agreements found.</td></tr>
             )}
           </tbody>
         </table>

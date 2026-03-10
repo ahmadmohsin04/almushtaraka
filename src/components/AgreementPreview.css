@@ -363,9 +363,12 @@
     padding: 12px;
   }
 
-  .preview-party p {
-    font-size: 0.8rem;
-  }
+.preview-parties-grid .preview-party:first-child {
+  border: 2px solid #1C2B1A;
+  border-radius: 6px;
+  padding: 12px;
+  background: #f0f4f0;
+}
 
   .party-label {
     font-size: 0.85rem !important;
