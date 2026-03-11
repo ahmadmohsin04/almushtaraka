@@ -453,3 +453,40 @@
 .buyer-detail-block .detail-grid {
   margin-top: 10px;
 }
+
+.buyer-id-image {
+  margin-top: 12px;
+}
+
+.buyer-id-image img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 6px;
+  border: 1px solid var(--grey-mid);
+  margin-top: 6px;
+}
+
+.admin-id-sides {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.admin-id-sides div {
+  flex: 1;
+}
+
+.admin-id-sides p {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.admin-id-sides img {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 6px;
+  border: 1px solid var(--grey-mid);
+}

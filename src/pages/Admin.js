@@ -119,6 +119,26 @@ function Admin() {
                   <div><label>EID / Passport</label><p>{buyer.eid || '—'}</p></div>
                   <div><label>Mobile</label><p>{buyer.mobile || '—'}</p></div>
                 </div>
+
+{(buyer.idFrontUrl || buyer.idBackUrl) && (
+  <div className="buyer-id-image">
+    <label>Customer ID</label>
+    <div className="admin-id-sides">
+      {buyer.idFrontUrl && (
+        <div>
+          <p>Front</p>
+          <img src={buyer.idFrontUrl} alt="ID Front" />
+        </div>
+      )}
+      {buyer.idBackUrl && (
+        <div>
+          <p>Back</p>
+          <img src={buyer.idBackUrl} alt="ID Back" />
+        </div>
+      )}
+    </div>
+  </div>
+)}
               </div>
             ))}
           </div>

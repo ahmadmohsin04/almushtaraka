@@ -132,10 +132,10 @@ const drawFooterSignatures = (pageNum) => {
   pdf.text('BUYER INITIALS', margin, footerY - 1);
 
   // Page number on right
-  pdf.setFontSize(7);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(180, 180, 180);
-  pdf.text(`Page ${pageNum}`, pageWidth - margin, footerY - 1, { align: 'right' });
+  // pdf.setFontSize(7);
+  // pdf.setFont('helvetica', 'normal');
+  // pdf.setTextColor(180, 180, 180);
+  // pdf.text(`Page ${pageNum}`, pageWidth - margin, footerY - 1, { align: 'right' });
 
   buyers.forEach((buyer, index) => {
     const slotCenterX = margin + (index * slotWidth) + slotWidth / 2;
@@ -588,7 +588,91 @@ if (extraStandardTerms && extraStandardTerms.length > 0) {
     }
     // DO NOT draw footer on last page — it has the full signatures section
 // Footer was already drawn by checkPageBreak on all previous pages
+    const buyersWithIds = formData.buyers.filter(b => b.idFrontUrl || b.idBackUrl);
+if (buyersWithIds.length > 0) {
+  pdf.addPage();
+  let idY = margin;
 
+  // Page header
+  pdf.setFillColor(28, 43, 26);
+  pdf.rect(margin, idY, contentWidth, 10, 'F');
+  pdf.setFontSize(13);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(245, 236, 215);
+  pdf.text('CUSTOMER IDENTIFICATION DOCUMENTS', pageWidth / 2, idY + 7, { align: 'center' });
+  idY += 18;
+
+  const imgWidth = (contentWidth - 10) / 2;
+  const imgHeight = 55;
+
+  for (let i = 0; i < buyersWithIds.length; i++) {
+    const buyer = buyersWithIds[i];
+
+    // Check page break
+    if (idY + imgHeight + 30 > pageHeight - margin) {
+      pdf.addPage();
+      idY = margin;
+    }
+
+    // Buyer name label
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(28, 43, 26);
+    pdf.text(buyer.representativeName || `Buyer ${i + 1}`, margin, idY);
+    idY += 6;
+
+    // Front and back side by side
+    const sides = [
+      { url: buyer.idFrontUrl, label: 'FRONT' },
+      { url: buyer.idBackUrl, label: 'BACK' },
+    ];
+
+    for (let s = 0; s < sides.length; s++) {
+      const xPos = s === 0 ? margin : margin + imgWidth + 10;
+      const { url, label } = sides[s];
+
+      // Label
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(200, 169, 110);
+      pdf.text(label, xPos, idY);
+
+      // Border
+      pdf.setDrawColor(200, 169, 110);
+      pdf.setLineWidth(0.4);
+      pdf.roundedRect(xPos, idY + 2, imgWidth, imgHeight, 2, 2, 'S');
+      pdf.setLineWidth(0.2);
+
+      if (url) {
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = url;
+          });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || 300;
+          canvas.height = img.naturalHeight || 200;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const imgData = canvas.toDataURL('image/jpeg');
+          pdf.addImage(imgData, 'JPEG', xPos + 2, idY + 4, imgWidth - 4, imgHeight - 4);
+        } catch (e) {
+          console.error('ID image error:', e);
+        }
+      } else {
+        // Placeholder if not uploaded
+        pdf.setFontSize(8);
+        pdf.setTextColor(180, 180, 180);
+        pdf.text('Not uploaded', xPos + imgWidth / 2, idY + imgHeight / 2 + 2, { align: 'center' });
+      }
+    }
+
+    idY += imgHeight + 20;
+  }
+}
     pdf.save(`Agreement-${formData.refNumber}.pdf`);
     clearBtns.forEach(btn => btn.style.display = 'block');  
     await saveToDatabase();
@@ -788,6 +872,35 @@ if (extraStandardTerms && extraStandardTerms.length > 0) {
     </div>
   ))}
 </div>
+
+{formData.buyers.some(b => b.idFrontUrl || b.idBackUrl) && (
+  <div className="preview-ids-page">
+    <div className="preview-title">
+      <h2>CUSTOMER IDENTIFICATION DOCUMENTS</h2>
+    </div>
+    {formData.buyers.filter(b => b.idFrontUrl || b.idBackUrl).map((buyer, index) => (
+      <div className="preview-id-card" key={index}>
+        <p className="preview-id-name">{buyer.representativeName || `Buyer ${index + 1}`}</p>
+        <div className="preview-id-sides">
+          <div className="preview-id-side">
+            <span>FRONT</span>
+            {buyer.idFrontUrl
+              ? <img src={buyer.idFrontUrl} alt="ID Front" />
+              : <div className="preview-id-placeholder">Not uploaded</div>
+            }
+          </div>
+          <div className="preview-id-side">
+            <span>BACK</span>
+            {buyer.idBackUrl
+              ? <img src={buyer.idBackUrl} alt="ID Back" />
+              : <div className="preview-id-placeholder">Not uploaded</div>
+            }
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
       </div>
     </div>

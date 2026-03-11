@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AgreementPreview from './AgreementPreview';
 import './AgreementForm.css';
+import { supabase } from '../supabaseClient'; 
 
 const generateRefNumber = (type) => {
   const prefix = type === 'sale' ? 'SA' : 'LCS';
@@ -72,6 +73,35 @@ const addBuyer = () => {
 const removeBuyer = (index) => {
   const updated = formData.buyers.filter((_, i) => i !== index);
   setFormData({ ...formData, buyers: updated });
+};
+
+const handleIdUpload = async (index, file, side) => {
+  if (!file) return;
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${formData.refNumber}-buyer${index + 1}-${side}-${Date.now()}.${fileExt}`;
+  
+  const { error } = await supabase.storage
+    .from('customer-ids')
+    .upload(fileName, file, { upsert: true });
+
+  if (error) {
+    console.error('Upload error:', error);
+    alert('Upload failed. Please try again.');
+    return;
+  }
+
+  const { data } = supabase.storage.from('customer-ids').getPublicUrl(fileName);
+  
+  const updated = [...formData.buyers];
+  if (side === 'front') {
+    updated[index] = { ...updated[index], idFrontUrl: data.publicUrl };
+  } else {
+    updated[index] = { ...updated[index], idBackUrl: data.publicUrl };
+  }
+  setFormData({ ...formData, buyers: updated });
+
+  const input = document.getElementById(`id-upload-${index}-${side}`);
+  if (input) input.value = '';
 };
 
 const addPaymentTerm = () => {
@@ -230,7 +260,49 @@ const generatePaymentSchedule = () => {
           <input type="text" placeholder="e.g. +971 52 168 2976" value={buyer.mobile}
             onChange={(e) => handleBuyerChange(index, 'mobile', e.target.value)} />
         </div>
-      </div>
+</div>
+
+{/* ID Upload */}
+<div className="form-group id-upload-group">
+  <input
+    id={`id-upload-${index}-front`}
+    type="file"
+    accept="image/jpeg,image/png"
+    onChange={(e) => handleIdUpload(index, e.target.files[0], 'front')}
+    className="id-upload-input"
+  />
+  <label htmlFor={`id-upload-${index}-front`} className="id-upload-label">
+    <span className="upload-icon">🪪</span>
+    <span>{buyer.idFrontUrl ? 'Change Front Image' : 'Upload Front of ID'}</span>
+  </label>
+  {buyer.idFrontUrl && (
+    <div className="id-upload-preview">
+      <img src={buyer.idFrontUrl} alt="ID Front" />
+      <span className="id-upload-success">✓ Front Uploaded</span>
+    </div>
+  )}
+</div>
+
+<div className="form-group id-upload-group">
+  <input
+    id={`id-upload-${index}-back`}
+    type="file"
+    accept="image/jpeg,image/png"
+    onChange={(e) => handleIdUpload(index, e.target.files[0], 'back')}
+    className="id-upload-input"
+  />
+  <label htmlFor={`id-upload-${index}-back`} className="id-upload-label">
+    <span className="upload-icon">🪪</span>
+    <span>{buyer.idBackUrl ? 'Change Back Image' : 'Upload Back of ID'}</span>
+  </label>
+  {buyer.idBackUrl && (
+    <div className="id-upload-preview">
+      <img src={buyer.idBackUrl} alt="ID Back" />
+      <span className="id-upload-success">✓ Back Uploaded</span>
+    </div>
+  )}
+</div>
+
     </div>
   ))}
   <button className="btn-add-buyer" onClick={addBuyer}>+ Add Another Buyer</button>
