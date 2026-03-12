@@ -484,3 +484,102 @@
   background: #f9f9f9;
   border-radius: 4px;
 }
+
+.camera-section {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.btn-take-photo {
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.btn-take-photo:hover {
+  background: var(--forest-mid);
+}
+
+.camera-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.camera-video {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 8px;
+  border: 2px solid var(--gold);
+}
+
+.camera-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-capture {
+  flex: 1;
+  background: var(--forest);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-capture:hover {
+  background: var(--forest-mid);
+}
+
+.btn-cancel-camera {
+  background: #e0e0e0;
+  color: #555;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.captured-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.captured-photo img {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 8px;
+  border: 2px solid var(--gold);
+}
+
+.btn-retake {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--forest);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-retake:hover {
+  background: var(--gold);
+  color: white;
+}

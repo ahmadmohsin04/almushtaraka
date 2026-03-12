@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import jsPDF from 'jspdf';
 import './AgreementPreview.css';
@@ -6,10 +6,12 @@ import sellerSignature from '../assets/seller-signature.jpg';
 import { supabase } from '../supabaseClient';
 import logoBase64 from '../assets/logo.jpg';
 
-function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliveryAmount, remainingBalance, monthlyInstallment, paymentSchedule,extraPaymentTerms, extraStandardTerms, onBack }) {
+function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliveryAmount, remainingBalance, monthlyInstallment, paymentSchedule, extraPaymentTerms, extraStandardTerms, onBack }) {
 
   const buyerSigRef = useRef([]);
   const isGenerating = useRef(false);
+  const [cameraActive, setCameraActive] = useState({});
+  const [buyerPhotos, setBuyerPhotos] = useState({});
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -62,12 +64,47 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
       }
     } catch (err) {
       console.error('Unexpected error:', err);
-    } 
+    }
   };
 
-const generatePDF = async () => {
-    if (isGenerating.current) return;  // ADD THIS
-      isGenerating.current = true;       // ADD THIS
+  const startCamera = async (index) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setCameraActive(prev => ({ ...prev, [index]: true }));
+      setTimeout(() => {
+        const video = document.getElementById(`camera-video-${index}`);
+        if (video) video.srcObject = stream;
+      }, 100);
+    } catch (err) {
+      alert('Could not access camera. Please allow camera permissions.');
+    }
+  };
+
+  const stopCamera = (index) => {
+    const video = document.getElementById(`camera-video-${index}`);
+    if (video && video.srcObject) {
+      video.srcObject.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+    setCameraActive(prev => ({ ...prev, [index]: false }));
+  };
+
+  const capturePhoto = (index, buyerName) => {
+    const video = document.getElementById(`camera-video-${index}`);
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg');
+    setBuyerPhotos(prev => ({ ...prev, [index]: { dataUrl, buyerName } }));
+    stopCamera(index);
+  };
+
+  const generatePDF = async () => {
+    if (isGenerating.current) return;
+    isGenerating.current = true;
+
     const clearBtns = document.querySelectorAll('.hide-on-pdf');
     clearBtns.forEach(btn => btn.style.display = 'none');
 
@@ -78,23 +115,23 @@ const generatePDF = async () => {
     const contentWidth = pageWidth - margin * 2;
     let y = margin;
 
-let currentPage = 1;
-let signaturesStarted = false;
+    let currentPage = 1;
+    let signaturesStarted = false;
 
-const checkPageBreak = (neededSpace = 10) => {
-  const bottomLimit = signaturesStarted 
-    ? pageHeight - margin
-    : pageHeight - 38;  // matches footerY - a little buffer
+    const checkPageBreak = (neededSpace = 10) => {
+      const bottomLimit = signaturesStarted
+        ? pageHeight - margin
+        : pageHeight - 38;
 
-  if (y + neededSpace > bottomLimit) {
-    if (!signaturesStarted) {
-      drawFooterSignatures(currentPage);
-    }
-    pdf.addPage();
-    currentPage++;
-    y = margin;
-  }
-};
+      if (y + neededSpace > bottomLimit) {
+        if (!signaturesStarted) {
+          drawFooterSignatures(currentPage);
+        }
+        pdf.addPage();
+        currentPage++;
+        y = margin;
+      }
+    };
 
     const addLine = (color = [220, 216, 207]) => {
       checkPageBreak(5);
@@ -115,62 +152,50 @@ const checkPageBreak = (neededSpace = 10) => {
       y += 8;
     };
 
-const drawFooterSignatures = (pageNum) => {
-  const footerY = pageHeight - 35;  // absolute from bottom, not relative to margin
-  const buyers = formData.buyers;
-  const slotWidth = contentWidth / buyers.length;
-  // Gold divider line
-  pdf.setDrawColor(200, 169, 110);
-  pdf.setLineWidth(0.4);
-  pdf.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
-  pdf.setLineWidth(0.2);
+    const drawFooterSignatures = (pageNum) => {
+      const footerY = pageHeight - 35;
+      const buyers = formData.buyers;
+      const slotWidth = contentWidth / buyers.length;
 
-  // "BUYER INITIALS" label on left
-  pdf.setFontSize(6.5);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(200, 169, 110);
-  pdf.text('BUYER INITIALS', margin, footerY - 1);
+      pdf.setDrawColor(200, 169, 110);
+      pdf.setLineWidth(0.4);
+      pdf.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
+      pdf.setLineWidth(0.2);
 
-  // Page number on right
-  // pdf.setFontSize(7);
-  // pdf.setFont('helvetica', 'normal');
-  // pdf.setTextColor(180, 180, 180);
-  // pdf.text(`Page ${pageNum}`, pageWidth - margin, footerY - 1, { align: 'right' });
+      pdf.setFontSize(6.5);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(200, 169, 110);
+      pdf.text('BUYER INITIALS', margin, footerY - 1);
 
-  buyers.forEach((buyer, index) => {
-    const slotCenterX = margin + (index * slotWidth) + slotWidth / 2;
-    const sigX = margin + (index * slotWidth) + 4;
+      buyers.forEach((buyer, index) => {
+        const slotCenterX = margin + (index * slotWidth) + slotWidth / 2;
+        const sigX = margin + (index * slotWidth) + 4;
 
-// Buyer label - left aligned
-pdf.setFontSize(7);
-pdf.setFont('helvetica', 'bold');
-pdf.setTextColor(28, 43, 26);
-pdf.text(buyers.length > 1 ? `BUYER ${index + 1}:` : 'BUYER:', sigX, footerY + 4);
+        pdf.setFontSize(7);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(28, 43, 26);
+        pdf.text(buyers.length > 1 ? `BUYER ${index + 1}:` : 'BUYER:', sigX, footerY + 4);
 
-// Buyer name - left aligned
-pdf.setFont('helvetica', 'normal');
-pdf.setTextColor(100, 100, 100);
-pdf.text(buyer.representativeName || '_______________', sigX, footerY + 8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(buyer.representativeName || '_______________', sigX, footerY + 8);
 
-    // Signature image - centered
-    const ref = buyerSigRef.current[index];
-    if (ref && !ref.isEmpty()) {
-      const sigImgWidth = 28;
-      pdf.addImage(ref.toDataURL('image/png'), 'PNG', slotCenterX - sigImgWidth / 2, footerY + 10, sigImgWidth, 10);
-    }
+        const ref = buyerSigRef.current[index];
+        if (ref && !ref.isEmpty()) {
+          const sigImgWidth = 28;
+          pdf.addImage(ref.toDataURL('image/png'), 'PNG', slotCenterX - sigImgWidth / 2, footerY + 10, sigImgWidth, 10);
+        }
 
-    // Signature line - centered
-    pdf.setDrawColor(200, 169, 110);
-    const lineHalf = (slotWidth - 10) / 2;
-    pdf.line(slotCenterX - lineHalf, footerY + 21, slotCenterX + lineHalf, footerY + 21);
+        pdf.setDrawColor(200, 169, 110);
+        const lineHalf = (slotWidth - 10) / 2;
+        pdf.line(slotCenterX - lineHalf, footerY + 21, slotCenterX + lineHalf, footerY + 21);
 
-    // Vertical divider between buyers
-    if (index < buyers.length - 1) {
-      pdf.setDrawColor(220, 216, 207);
-      pdf.line(margin + (index + 1) * slotWidth, footerY - 4, margin + (index + 1) * slotWidth, footerY + 22);
-    }
-  });
-};
+        if (index < buyers.length - 1) {
+          pdf.setDrawColor(220, 216, 207);
+          pdf.line(margin + (index + 1) * slotWidth, footerY - 4, margin + (index + 1) * slotWidth, footerY + 22);
+        }
+      });
+    };
 
     // ── LOGO + HEADER ──
     try {
@@ -216,25 +241,22 @@ pdf.text(buyer.representativeName || '_______________', sigX, footerY + 8);
 
     addLine();
 
-    // ── SELLER & BUYERS ──
+    // ── PARTIES ──
     addSectionTitle('PARTIES');
     y += 2;
 
     const col1 = margin;
-    const col2 = pageWidth - margin; // right-aligned anchor
+    const col2 = pageWidth - margin;
 
-    // Seller (left) + Buyer 1 (right) in same row
     const sellerStartY = y;
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(200, 169, 110);
-    // Border around seller block
-// Border around seller block
-pdf.setDrawColor(28, 43, 26);
-pdf.setLineWidth(0.25);
-pdf.roundedRect(col1 - 2, sellerStartY - 3, (pageWidth / 2) - 40, 28, 2, 2, 'S');
-pdf.setLineWidth(0.2);
-    y +=1;
+    pdf.setDrawColor(28, 43, 26);
+    pdf.setLineWidth(0.25);
+    pdf.roundedRect(col1 - 2, sellerStartY - 3, (pageWidth / 2) - 40, 28, 2, 2, 'S');
+    pdf.setLineWidth(0.2);
+    y += 1;
     pdf.text('SELLER:-', col1, y);
     y += 5;
     pdf.setFont('helvetica', 'bold');
@@ -272,7 +294,6 @@ pdf.setLineWidth(0.2);
 
     y = Math.max(y, buyerRowY) + 8;
 
-    // Remaining buyers in pairs: left col1, right col2
     const remainingBuyers = formData.buyers.slice(1);
     for (let i = 0; i < remainingBuyers.length; i += 2) {
       checkPageBreak(35);
@@ -282,7 +303,6 @@ pdf.setLineWidth(0.2);
       let leftY = pairStartY;
       let rightY = pairStartY;
 
-      // Left buyer
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(200, 169, 110);
@@ -300,7 +320,6 @@ pdf.setLineWidth(0.2);
       leftY += 5;
       pdf.text(`Mobile: ${leftBuyer.mobile || '___________________'}`, col1, leftY);
 
-      // Right buyer
       if (rightBuyer) {
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'bold');
@@ -415,50 +434,49 @@ pdf.setLineWidth(0.2);
       });
     });
 
-    // Extra payment terms
-if (extraPaymentTerms && extraPaymentTerms.length > 0) {
-  const romans = ['V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-  extraPaymentTerms.filter(t => t.trim()).forEach((term, index) => {
-    pdf.splitTextToSize(`${romans[index]}- ${term}`, contentWidth).forEach(l => {
-      checkPageBreak(6);
-      pdf.text(l, margin, y);
-      y += 5;
-    });
-  });
-}
-
-// ── PAYMENT SCHEDULE ──
-if (paymentSchedule.length > 0) {
-  addSectionTitle('PAYMENT SCHEDULE');
-  y += 2;
-
-  const schedColX = [margin, margin + 20, margin + 70, margin + 120];
-  
-  // Draw table header
-  checkPageBreak(15);
-  pdf.setFillColor(45, 74, 42);
-  pdf.rect(margin, y - 4, contentWidth, 8, 'F');
-  pdf.setFontSize(8);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(245, 236, 215);
-  ['MONTH', 'PERIOD', 'DUE DATE', 'AMOUNT (AED)'].forEach((h, i) => pdf.text(h, schedColX[i] + 1, y + 1));
-  y += 7;
-
-  paymentSchedule.forEach((row, i) => {
-    checkPageBreak(10);
-    if (i % 2 === 0) {
-      pdf.setFillColor(247, 244, 239);
-      pdf.rect(margin, y - 4, contentWidth, 7, 'F');
+    if (extraPaymentTerms && extraPaymentTerms.length > 0) {
+      const romans = ['V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+      extraPaymentTerms.filter(t => t.trim()).forEach((term, index) => {
+        pdf.splitTextToSize(`${romans[index]}- ${term}`, contentWidth).forEach(l => {
+          checkPageBreak(6);
+          pdf.text(l, margin, y);
+          y += 5;
+        });
+      });
     }
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(30, 43, 26);
-    [String(row.month), row.label, row.dueDate, `AED ${row.amount}`]
-      .forEach((d, j) => pdf.text(d, schedColX[j] + 1, y));
-    y += 7;
-  });
-  y += 5;
-}
+
+    // ── PAYMENT SCHEDULE ──
+    if (paymentSchedule.length > 0) {
+      addSectionTitle('PAYMENT SCHEDULE');
+      y += 2;
+
+      const schedColX = [margin, margin + 20, margin + 70, margin + 120];
+
+      checkPageBreak(15);
+      pdf.setFillColor(45, 74, 42);
+      pdf.rect(margin, y - 4, contentWidth, 8, 'F');
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(245, 236, 215);
+      ['MONTH', 'PERIOD', 'DUE DATE', 'AMOUNT (AED)'].forEach((h, i) => pdf.text(h, schedColX[i] + 1, y + 1));
+      y += 7;
+
+      paymentSchedule.forEach((row, i) => {
+        checkPageBreak(10);
+        if (i % 2 === 0) {
+          pdf.setFillColor(247, 244, 239);
+          pdf.rect(margin, y - 4, contentWidth, 7, 'F');
+        }
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(30, 43, 26);
+        [String(row.month), row.label, row.dueDate, `AED ${row.amount}`]
+          .forEach((d, j) => pdf.text(d, schedColX[j] + 1, y));
+        y += 7;
+      });
+      y += 5;
+    }
+
     // ── TERMS & CONDITIONS ──
     addSectionTitle('STANDARD TERMS & CONDITIONS');
     y += 3;
@@ -481,19 +499,18 @@ if (paymentSchedule.length > 0) {
       });
     });
 
-    // Extra standard terms
-if (extraStandardTerms && extraStandardTerms.length > 0) {
-  extraStandardTerms.filter(t => t.trim()).forEach((term, index) => {
-    pdf.splitTextToSize(`${String(index + 7).padStart(2, '0')}- ${term}`, contentWidth).forEach(l => {
-      checkPageBreak(6);
-      pdf.setFontSize(8.5);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(60, 60, 60);
-      pdf.text(l, margin, y);
-      y += 5;
-    });
-  });
-}
+    if (extraStandardTerms && extraStandardTerms.length > 0) {
+      extraStandardTerms.filter(t => t.trim()).forEach((term, index) => {
+        pdf.splitTextToSize(`${String(index + 7).padStart(2, '0')}- ${term}`, contentWidth).forEach(l => {
+          checkPageBreak(6);
+          pdf.setFontSize(8.5);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(60, 60, 60);
+          pdf.text(l, margin, y);
+          y += 5;
+        });
+      });
+    }
 
     // ── SIGNATURES ──
     signaturesStarted = true;
@@ -521,7 +538,6 @@ if (extraStandardTerms && extraStandardTerms.length > 0) {
       const right = allSignatories[i + 1];
       const rowStartY = y;
 
-      // ── Left signatory (left-aligned at col1) ──
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(200, 169, 110);
@@ -551,7 +567,6 @@ if (extraStandardTerms && extraStandardTerms.length > 0) {
       pdf.setTextColor(150, 150, 150);
       pdf.text(`${left.label} Signature`, col1, rowStartY + 42);
 
-      // ── Right signatory (right-aligned at col2) ──
       if (right) {
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'bold');
@@ -564,7 +579,6 @@ if (extraStandardTerms && extraStandardTerms.length > 0) {
         if (right.sub) pdf.text(right.sub, col2, rowStartY + 10, { align: 'right' });
         if (right.eid) pdf.text(`EID: ${right.eid}`, col2, rowStartY + 10, { align: 'right' });
 
-        // addImage: x = col2 - 50 so image ends at right edge
         if (right.isSeller) {
           try {
             const s = require('../assets/seller-signature.jpg');
@@ -586,98 +600,148 @@ if (extraStandardTerms && extraStandardTerms.length > 0) {
 
       y = rowStartY + 52;
     }
-    // DO NOT draw footer on last page — it has the full signatures section
-// Footer was already drawn by checkPageBreak on all previous pages
+
+    // ── CUSTOMER IDs PAGE ──
     const buyersWithIds = formData.buyers.filter(b => b.idFrontUrl || b.idBackUrl);
-if (buyersWithIds.length > 0) {
-  pdf.addPage();
-  let idY = margin;
-
-  // Page header
-  pdf.setFillColor(28, 43, 26);
-  pdf.rect(margin, idY, contentWidth, 10, 'F');
-  pdf.setFontSize(13);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(245, 236, 215);
-  pdf.text('CUSTOMER IDENTIFICATION DOCUMENTS', pageWidth / 2, idY + 7, { align: 'center' });
-  idY += 18;
-
-  const imgWidth = (contentWidth - 10) / 2;
-  const imgHeight = 55;
-
-  for (let i = 0; i < buyersWithIds.length; i++) {
-    const buyer = buyersWithIds[i];
-
-    // Check page break
-    if (idY + imgHeight + 30 > pageHeight - margin) {
+    if (buyersWithIds.length > 0) {
       pdf.addPage();
-      idY = margin;
-    }
+      currentPage++;
+      drawFooterSignatures(currentPage);
+      let idY = margin;
 
-    // Buyer name label
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(28, 43, 26);
-    pdf.text(buyer.representativeName || `Buyer ${i + 1}`, margin, idY);
-    idY += 6;
-
-    // Front and back side by side
-    const sides = [
-      { url: buyer.idFrontUrl, label: 'FRONT' },
-      { url: buyer.idBackUrl, label: 'BACK' },
-    ];
-
-    for (let s = 0; s < sides.length; s++) {
-      const xPos = s === 0 ? margin : margin + imgWidth + 10;
-      const { url, label } = sides[s];
-
-      // Label
-      pdf.setFontSize(7);
+      pdf.setFillColor(28, 43, 26);
+      pdf.rect(margin, idY, contentWidth, 10, 'F');
+      pdf.setFontSize(13);
       pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(200, 169, 110);
-      pdf.text(label, xPos, idY);
+      pdf.setTextColor(245, 236, 215);
+      pdf.text('CUSTOMER IDENTIFICATION DOCUMENTS', pageWidth / 2, idY + 7, { align: 'center' });
+      idY += 18;
 
-      // Border
-      pdf.setDrawColor(200, 169, 110);
-      pdf.setLineWidth(0.4);
-      pdf.roundedRect(xPos, idY + 2, imgWidth, imgHeight, 2, 2, 'S');
-      pdf.setLineWidth(0.2);
+      const imgWidth = (contentWidth - 10) / 2;
+      const imgHeight = 55;
 
-      if (url) {
-        try {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-            img.src = url;
-          });
-          const canvas = document.createElement('canvas');
-          canvas.width = img.naturalWidth || 300;
-          canvas.height = img.naturalHeight || 200;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          const imgData = canvas.toDataURL('image/jpeg');
-          pdf.addImage(imgData, 'JPEG', xPos + 2, idY + 4, imgWidth - 4, imgHeight - 4);
-        } catch (e) {
-          console.error('ID image error:', e);
+      for (let i = 0; i < buyersWithIds.length; i++) {
+        const buyer = buyersWithIds[i];
+
+        if (idY + imgHeight + 30 > pageHeight - margin - 30) {
+          pdf.addPage();
+          currentPage++;
+          drawFooterSignatures(currentPage);
+          idY = margin;
         }
-      } else {
-        // Placeholder if not uploaded
-        pdf.setFontSize(8);
-        pdf.setTextColor(180, 180, 180);
-        pdf.text('Not uploaded', xPos + imgWidth / 2, idY + imgHeight / 2 + 2, { align: 'center' });
+
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(28, 43, 26);
+        pdf.text(buyer.representativeName || `Buyer ${i + 1}`, margin, idY);
+        idY += 6;
+
+        const sides = [
+          { url: buyer.idFrontUrl, label: 'FRONT' },
+          { url: buyer.idBackUrl, label: 'BACK' },
+        ];
+
+        for (let s = 0; s < sides.length; s++) {
+          const xPos = s === 0 ? margin : margin + imgWidth + 10;
+          const { url, label } = sides[s];
+
+          pdf.setFontSize(7);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(200, 169, 110);
+          pdf.text(label, xPos, idY);
+
+          pdf.setDrawColor(200, 169, 110);
+          pdf.setLineWidth(0.4);
+          pdf.roundedRect(xPos, idY + 2, imgWidth, imgHeight, 2, 2, 'S');
+          pdf.setLineWidth(0.2);
+
+          if (url) {
+            try {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              await new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+                img.src = url;
+              });
+              const canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth || 300;
+              canvas.height = img.naturalHeight || 200;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              const imgData = canvas.toDataURL('image/jpeg');
+              pdf.addImage(imgData, 'JPEG', xPos + 2, idY + 4, imgWidth - 4, imgHeight - 4);
+            } catch (e) {
+              console.error('ID image error:', e);
+            }
+          } else {
+            pdf.setFontSize(8);
+            pdf.setTextColor(180, 180, 180);
+            pdf.text('Not uploaded', xPos + imgWidth / 2, idY + imgHeight / 2 + 2, { align: 'center' });
+          }
+        }
+
+        idY += imgHeight + 20;
       }
     }
 
-    idY += imgHeight + 20;
-  }
-}
-    pdf.save(`Agreement-${formData.refNumber}.pdf`);
-    clearBtns.forEach(btn => btn.style.display = 'block');  
-    await saveToDatabase();
-    isGenerating.current = false;  // ADD THIS
+    // ── BUYER PHOTOS PAGE ──
+    const photoEntries = Object.entries(buyerPhotos);
+    if (photoEntries.length > 0) {
+      pdf.addPage();
+      currentPage++;
+      drawFooterSignatures(currentPage);
+      let photoY = margin;
 
+      pdf.setFillColor(28, 43, 26);
+      pdf.rect(margin, photoY, contentWidth, 10, 'F');
+      pdf.setFontSize(13);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(245, 236, 215);
+      pdf.text('BUYER PHOTOGRAPHS', pageWidth / 2, photoY + 7, { align: 'center' });
+      photoY += 18;
+
+      const photoWidth = (contentWidth - 10) / 2;
+      const photoHeight = 70;
+      const cols = [margin, margin + photoWidth + 10];
+
+      for (let i = 0; i < photoEntries.length; i++) {
+        const [buyerIndex, photo] = photoEntries[i];
+        const col = cols[i % 2];
+
+        if (i % 2 === 0 && i > 0) {
+          photoY += photoHeight + 24;
+        }
+
+        if (photoY + photoHeight + 30 > pageHeight - margin - 30) {
+          pdf.addPage();
+          currentPage++;
+          drawFooterSignatures(currentPage);
+          photoY = margin;
+        }
+
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 169, 110);
+        pdf.text(photo.buyerName || `Buyer ${parseInt(buyerIndex) + 1}`, col, photoY);
+
+        pdf.setDrawColor(200, 169, 110);
+        pdf.setLineWidth(0.4);
+        pdf.roundedRect(col, photoY + 3, photoWidth, photoHeight, 2, 2, 'S');
+        pdf.setLineWidth(0.2);
+
+        try {
+          pdf.addImage(photo.dataUrl, 'JPEG', col + 2, photoY + 5, photoWidth - 4, photoHeight - 4);
+        } catch (e) {
+          console.error('Photo error:', e);
+        }
+      }
+    }
+
+    pdf.save(`Agreement-${formData.refNumber}.pdf`);
+    clearBtns.forEach(btn => btn.style.display = 'block');
+    await saveToDatabase();
+    isGenerating.current = false;
   };
 
   return (
@@ -713,27 +777,26 @@ if (buyersWithIds.length > 0) {
           <span><strong>DATE:</strong> {formatDate(formData.date)}</span>
         </div>
 
-        {/* Seller and Buyers */}
-{/* Parties - GRID: seller + each buyer = own cell, 2 per row */}
-<div className="preview-parties-grid">
-  <div className="preview-party">
-    <p className="party-label">SELLER:-</p>
-    <p><strong>ALMUSHTARAKA TRADING COMPANY</strong></p>
-    <p>DIBBA INDUSTRIAL AREA</p>
-    <p>Representative: ARIF MUKHTAR MALIK</p>
-    <p>Partner & Manager</p>
-  </div>
-  {formData.buyers.map((buyer, index) => (
-    <div className="preview-party" key={index}>
-      <p className="party-label">{formData.buyers.length > 1 ? `BUYER ${index + 1}:-` : 'BUYER:-'}</p>
-      <p><strong>{buyer.buyerCompany || '___________________'}</strong></p>
-      {index === 0 && <p>License Number: {buyer.licenseNumber || '___________________'}</p>}
-      <p>Representative: {buyer.representativeName || '___________________'}</p>
-      <p>ID#: {buyer.eid || '___________________'}</p>
-      <p>Mobile: {buyer.mobile || '___________________'}</p>
-    </div>
-  ))}
-</div>
+        {/* Parties */}
+        <div className="preview-parties-grid">
+          <div className="preview-party">
+            <p className="party-label">SELLER:-</p>
+            <p><strong>ALMUSHTARAKA TRADING COMPANY</strong></p>
+            <p>DIBBA INDUSTRIAL AREA</p>
+            <p>Representative: ARIF MUKHTAR MALIK</p>
+            <p>Partner & Manager</p>
+          </div>
+          {formData.buyers.map((buyer, index) => (
+            <div className="preview-party" key={index}>
+              <p className="party-label">{formData.buyers.length > 1 ? `BUYER ${index + 1}:-` : 'BUYER:-'}</p>
+              <p><strong>{buyer.buyerCompany || '___________________'}</strong></p>
+              {index === 0 && <p>License Number: {buyer.licenseNumber || '___________________'}</p>}
+              <p>Representative: {buyer.representativeName || '___________________'}</p>
+              <p>ID#: {buyer.eid || '___________________'}</p>
+              <p>Mobile: {buyer.mobile || '___________________'}</p>
+            </div>
+          ))}
+        </div>
 
         {/* Products Table */}
         <table className="preview-table">
@@ -777,16 +840,16 @@ if (buyersWithIds.length > 0) {
         </table>
 
         {/* Payment Terms */}
-<div className="preview-section">
-  <p className="section-title">Payment Terms:-</p>
-  <p>I- At the time of booking / Token Money, CASH AED = {formData.tokenAmount}/-</p>
-  <p>II- At the time of delivery of goods, AED: {deliveryAmount.toFixed(2)}/-</p>
-  <p>III- Remaining balance AED {remainingBalance.toFixed(2)} to be paid in {formData.installmentMonths} monthly installments of AED {monthlyInstallment.toFixed(2)} per month.</p>
-  <p>IV- Installments start from {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is 5th of each month.</p>
-  {extraPaymentTerms && extraPaymentTerms.filter(t => t.trim()).map((term, index) => (
-    <p key={index}>{['V','VI','VII','VIII','IX','X'][index]}- {term}</p>
-  ))}
-</div>
+        <div className="preview-section">
+          <p className="section-title">Payment Terms:-</p>
+          <p>I- At the time of booking / Token Money, CASH AED = {formData.tokenAmount}/-</p>
+          <p>II- At the time of delivery of goods, AED: {deliveryAmount.toFixed(2)}/-</p>
+          <p>III- Remaining balance AED {remainingBalance.toFixed(2)} to be paid in {formData.installmentMonths} monthly installments of AED {monthlyInstallment.toFixed(2)} per month.</p>
+          <p>IV- Installments start from {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is 5th of each month.</p>
+          {extraPaymentTerms && extraPaymentTerms.filter(t => t.trim()).map((term, index) => (
+            <p key={index}>{['V', 'VI', 'VII', 'VIII', 'IX', 'X'][index]}- {term}</p>
+          ))}
+        </div>
 
         {/* Payment Schedule */}
         {paymentSchedule.length > 0 && (
@@ -816,19 +879,19 @@ if (buyersWithIds.length > 0) {
         )}
 
         {/* Terms and Conditions */}
-<div className="preview-section">
-  <p className="section-title">Standard Terms & Conditions:-</p>
-  {terms.map((term, i) => (
-    <p key={i} className="term-item">
-      <strong>{String(i + 1).padStart(2, '0')}-</strong> {term}
-    </p>
-  ))}
-  {extraStandardTerms && extraStandardTerms.filter(t => t.trim()).map((term, index) => (
-    <p key={index} className="term-item">
-      <strong>{String(index + 7).padStart(2, '0')}-</strong> {term}
-    </p>
-  ))}
-</div>
+        <div className="preview-section">
+          <p className="section-title">Standard Terms & Conditions:-</p>
+          {terms.map((term, i) => (
+            <p key={i} className="term-item">
+              <strong>{String(i + 1).padStart(2, '0')}-</strong> {term}
+            </p>
+          ))}
+          {extraStandardTerms && extraStandardTerms.filter(t => t.trim()).map((term, index) => (
+            <p key={index} className="term-item">
+              <strong>{String(index + 7).padStart(2, '0')}-</strong> {term}
+            </p>
+          ))}
+        </div>
 
         {/* Guarantor - Lease Only */}
         {agreementType === 'lease' && (
@@ -841,66 +904,116 @@ if (buyersWithIds.length > 0) {
         )}
 
         {/* Signatures */}
-{/* Signatures */}
-<div className="preview-signatures-grid">
-  {/* Seller always first */}
-  <div className="sig-box">
-    <p className="sig-label">SELLER:</p>
-    <p>ARIF MUKHTAR MALIK</p>
-    <p>Partner & Manager</p>
-    <p className="sig-label" style={{ marginTop: '10px' }}>Signature:</p>
-    <img src={sellerSignature} alt="Seller Signature" className="seller-sig-img" />
-  </div>
-
-  {formData.buyers.map((buyer, index) => (
-    <div className="sig-box" key={index}>
-      <p className="sig-label">BUYER {formData.buyers.length > 1 ? index + 1 : ''}:</p>
-      <p>{buyer.representativeName || '___________________'}</p>
-      <p>EID: {buyer.eid || '___________________'}</p>
-      <p className="sig-label" style={{ marginTop: '10px' }}>Signature:</p>
-      <SignatureCanvas
-        ref={el => buyerSigRef.current[index] = el}
-        penColor="black"
-        canvasProps={{ width: 220, height: 100, className: 'sig-canvas' }}
-      />
-      <button
-        id={`buyer-clear-btn-${index}`}
-        className="btn-clear-sig hide-on-pdf"
-        onClick={() => buyerSigRef.current[index].clear()}>
-        Clear
-      </button>
-    </div>
-  ))}
-</div>
-
-{formData.buyers.some(b => b.idFrontUrl || b.idBackUrl) && (
-  <div className="preview-ids-page">
-    <div className="preview-title">
-      <h2>CUSTOMER IDENTIFICATION DOCUMENTS</h2>
-    </div>
-    {formData.buyers.filter(b => b.idFrontUrl || b.idBackUrl).map((buyer, index) => (
-      <div className="preview-id-card" key={index}>
-        <p className="preview-id-name">{buyer.representativeName || `Buyer ${index + 1}`}</p>
-        <div className="preview-id-sides">
-          <div className="preview-id-side">
-            <span>FRONT</span>
-            {buyer.idFrontUrl
-              ? <img src={buyer.idFrontUrl} alt="ID Front" />
-              : <div className="preview-id-placeholder">Not uploaded</div>
-            }
+        <div className="preview-signatures-grid">
+          <div className="sig-box">
+            <p className="sig-label">SELLER:</p>
+            <p>ARIF MUKHTAR MALIK</p>
+            <p>Partner & Manager</p>
+            <p className="sig-label" style={{ marginTop: '10px' }}>Signature:</p>
+            <img src={sellerSignature} alt="Seller Signature" className="seller-sig-img" />
           </div>
-          <div className="preview-id-side">
-            <span>BACK</span>
-            {buyer.idBackUrl
-              ? <img src={buyer.idBackUrl} alt="ID Back" />
-              : <div className="preview-id-placeholder">Not uploaded</div>
-            }
-          </div>
+
+          {formData.buyers.map((buyer, index) => (
+            <div className="sig-box" key={index}>
+              <p className="sig-label">BUYER {formData.buyers.length > 1 ? index + 1 : ''}:</p>
+              <p>{buyer.representativeName || '___________________'}</p>
+              <p>EID: {buyer.eid || '___________________'}</p>
+              <p className="sig-label" style={{ marginTop: '10px' }}>Signature:</p>
+              <SignatureCanvas
+                ref={el => buyerSigRef.current[index] = el}
+                penColor="black"
+                canvasProps={{ width: 220, height: 100, className: 'sig-canvas' }}
+              />
+              <button
+                id={`buyer-clear-btn-${index}`}
+                className="btn-clear-sig hide-on-pdf"
+                onClick={() => buyerSigRef.current[index].clear()}>
+                Clear
+              </button>
+
+              {/* Camera Section */}
+              <div className="camera-section hide-on-pdf">
+                {!cameraActive[index] && !buyerPhotos[index] && (
+                  <button className="btn-take-photo" onClick={() => startCamera(index)}>
+                    📷 Take Photo
+                  </button>
+                )}
+                {cameraActive[index] && (
+                  <div className="camera-preview">
+                    <video id={`camera-video-${index}`} autoPlay playsInline className="camera-video" />
+                    <div className="camera-actions">
+                      <button className="btn-capture" onClick={() => capturePhoto(index, buyer.representativeName)}>
+                        ⚪ Capture
+                      </button>
+                      <button className="btn-cancel-camera" onClick={() => stopCamera(index)}>
+                        ✕ Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {buyerPhotos[index] && (
+                  <div className="captured-photo">
+                    <img src={buyerPhotos[index].dataUrl} alt={buyer.representativeName} />
+                    <button className="btn-retake" onClick={() => {
+                      setBuyerPhotos(prev => { const u = { ...prev }; delete u[index]; return u; });
+                      startCamera(index);
+                    }}>
+                      🔄 Retake
+                    </button>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          ))}
         </div>
-      </div>
-    ))}
-  </div>
-)}
+
+        {/* Customer IDs Page */}
+        {formData.buyers.some(b => b.idFrontUrl || b.idBackUrl) && (
+          <div className="preview-ids-page">
+            <div className="preview-title">
+              <h2>CUSTOMER IDENTIFICATION DOCUMENTS</h2>
+            </div>
+            {formData.buyers.filter(b => b.idFrontUrl || b.idBackUrl).map((buyer, index) => (
+              <div className="preview-id-card" key={index}>
+                <p className="preview-id-name">{buyer.representativeName || `Buyer ${index + 1}`}</p>
+                <div className="preview-id-sides">
+                  <div className="preview-id-side">
+                    <span>FRONT</span>
+                    {buyer.idFrontUrl
+                      ? <img src={buyer.idFrontUrl} alt="ID Front" />
+                      : <div className="preview-id-placeholder">Not uploaded</div>
+                    }
+                  </div>
+                  <div className="preview-id-side">
+                    <span>BACK</span>
+                    {buyer.idBackUrl
+                      ? <img src={buyer.idBackUrl} alt="ID Back" />
+                      : <div className="preview-id-placeholder">Not uploaded</div>
+                    }
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Buyer Photos Preview */}
+        {Object.keys(buyerPhotos).length > 0 && (
+          <div className="preview-ids-page">
+            <div className="preview-title">
+              <h2>BUYER PHOTOGRAPHS</h2>
+            </div>
+            <div className="preview-ids-grid">
+              {Object.entries(buyerPhotos).map(([index, photo]) => (
+                <div className="preview-id-card" key={index}>
+                  <p className="preview-id-name">{photo.buyerName || `Buyer ${parseInt(index) + 1}`}</p>
+                  <img src={photo.dataUrl} alt={photo.buyerName} style={{ width: '100%', borderRadius: '6px' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
