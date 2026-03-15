@@ -5,6 +5,7 @@ import Products from './pages/Products';
 import Agreement from './pages/Agreement';
 import Admin from './pages/Admin';
 import Contact from './pages/Contact';
+import Customers from './pages/Customers';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/agreement" element={<Agreement />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/customers" element={<Customers />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>

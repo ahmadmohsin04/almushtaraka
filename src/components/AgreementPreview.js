@@ -6,8 +6,8 @@ import sellerSignature from '../assets/seller-signature.jpg';
 import { supabase } from '../supabaseClient';
 import logoBase64 from '../assets/logo.jpg';
 
-function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliveryAmount, remainingBalance, monthlyInstallment, paymentSchedule, extraPaymentTerms, extraStandardTerms, onBack }) {
-
+function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliveryAmount, remainingBalance, monthlyInstallment, paymentSchedule, extraPaymentTerms, extraStandardTerms, currency, onBack }) {
+  const cur = currency || 'AED';
   const buyerSigRef = useRef([]);
   const isGenerating = useRef(false);
   const [cameraActive, setCameraActive] = useState({});
@@ -385,8 +385,8 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(30, 43, 26);
       const amount = (parseFloat(p.qty) * parseFloat(p.rate) || 0).toFixed(2);
-      [String(i + 1), p.name, String(p.qty), p.unit, parseFloat(p.rate).toFixed(2), 'AED', amount]
-        .forEach((d, j) => pdf.text(String(d), colX[j] + 1, y));
+      [String(i + 1), p.name, String(p.qty), p.unit, parseFloat(p.rate).toFixed(2), cur, amount] 
+       .forEach((d, j) => pdf.text(String(d), colX[j] + 1, y));
       y += 7;
     });
 
@@ -411,7 +411,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(245, 236, 215);
     pdf.text('TOTAL AMOUNT INCLUDING VAT', margin + 3, y + 1);
-    pdf.text(`AED ${total.toFixed(2)}`, colX[6] + 1, y + 1);
+    pdf.text(`${cur} ${total.toFixed(2)}`, colX[6] + 1, y + 1);
     y += 12;
 
     // ── PAYMENT TERMS ──
@@ -422,11 +422,10 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
     pdf.setTextColor(80, 80, 80);
 
     [
-      `I-   At the time of booking / Token Money, CASH AED = ${formData.tokenAmount}/-`,
-      `II-  At the time of delivery of goods, AED: ${deliveryAmount.toFixed(2)}/-`,
-      `III- Remaining balance AED ${remainingBalance.toFixed(2)} to be paid in ${formData.installmentMonths} monthly installments of AED ${monthlyInstallment.toFixed(2)} per month.`,
-      `IV-  Installments start from ${paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is 5th of each month.`,
-    ].forEach(line => {
+`I-   At the time of booking / Token Money, CASH ${cur} = ${formData.tokenAmount}/-`,
+`II-  At the time of delivery of goods, ${cur}: ${deliveryAmount.toFixed(2)}/-`,
+`III- Remaining balance ${cur} ${remainingBalance.toFixed(2)} to be paid in ${formData.installmentMonths} monthly installments of ${cur} ${monthlyInstallment.toFixed(2)} per month.`,
+`IV-  Installments start from ${paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is ${paymentSchedule.length > 0 ? paymentSchedule[0].dueDate.split(' ')[0] : '5th'} of each month.`,    ].forEach(line => {
       pdf.splitTextToSize(line, contentWidth).forEach(l => {
         checkPageBreak(6);
         pdf.text(l, margin, y);
@@ -458,7 +457,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(245, 236, 215);
-      ['MONTH', 'PERIOD', 'DUE DATE', 'AMOUNT (AED)'].forEach((h, i) => pdf.text(h, schedColX[i] + 1, y + 1));
+      ['MONTH', 'PERIOD', 'DUE DATE', `AMOUNT (${cur})`].forEach((h, i) => pdf.text(h, schedColX[i] + 1, y + 1));
       y += 7;
 
       paymentSchedule.forEach((row, i) => {
@@ -470,7 +469,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(30, 43, 26);
-        [String(row.month), row.label, row.dueDate, `AED ${row.amount}`]
+        [String(row.month), row.label, row.dueDate, `${cur} ${row.amount}`]
           .forEach((d, j) => pdf.text(d, schedColX[j] + 1, y));
         y += 7;
       });
@@ -819,7 +818,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
                 <td>{p.qty}</td>
                 <td>{p.unit}</td>
                 <td>{parseFloat(p.rate).toFixed(2)}</td>
-                <td>AED</td>
+                <td>{cur}</td>
                 <td>{((parseFloat(p.qty) * parseFloat(p.rate)) || 0).toFixed(2)}</td>
               </tr>
             ))}
@@ -834,7 +833,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
             </tr>
             <tr className="total-row-final">
               <td colSpan="4"><strong>TOTAL AMOUNT INCLUDING VAT</strong></td>
-              <td colSpan="3"><strong>AED {total.toFixed(2)}</strong></td>
+              <td colSpan="3"><strong>{cur} {total.toFixed(2)}</strong></td>
             </tr>
           </tbody>
         </table>
@@ -842,11 +841,10 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
         {/* Payment Terms */}
         <div className="preview-section">
           <p className="section-title">Payment Terms:-</p>
-          <p>I- At the time of booking / Token Money, CASH AED = {formData.tokenAmount}/-</p>
-          <p>II- At the time of delivery of goods, AED: {deliveryAmount.toFixed(2)}/-</p>
-          <p>III- Remaining balance AED {remainingBalance.toFixed(2)} to be paid in {formData.installmentMonths} monthly installments of AED {monthlyInstallment.toFixed(2)} per month.</p>
-          <p>IV- Installments start from {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is 5th of each month.</p>
-          {extraPaymentTerms && extraPaymentTerms.filter(t => t.trim()).map((term, index) => (
+<p>I- At the time of booking / Token Money, CASH {cur} = {formData.tokenAmount}/-</p>
+<p>II- At the time of delivery of goods, {cur}: {deliveryAmount.toFixed(2)}/-</p>
+<p>III- Remaining balance {cur} {remainingBalance.toFixed(2)} to be paid in {formData.installmentMonths} monthly installments of {cur} {monthlyInstallment.toFixed(2)} per month.</p>
+<p>IV- Installments start from {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate : ''}. Due date is {paymentSchedule.length > 0 ? paymentSchedule[0].dueDate.split(' ')[0] : '5th'} of each month.</p>          {extraPaymentTerms && extraPaymentTerms.filter(t => t.trim()).map((term, index) => (
             <p key={index}>{['V', 'VI', 'VII', 'VIII', 'IX', 'X'][index]}- {term}</p>
           ))}
         </div>
@@ -861,7 +859,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
                   <th>Month</th>
                   <th>Period</th>
                   <th>Due Date</th>
-                  <th>Amount (AED)</th>
+                  <th>Amount ({cur})</th>
                 </tr>
               </thead>
               <tbody>
@@ -870,7 +868,7 @@ function AgreementPreview({ formData, agreementType, subtotal, vat, total, deliv
                     <td>{row.month}</td>
                     <td>{row.label}</td>
                     <td>{row.dueDate}</td>
-                    <td>{row.amount}</td>
+                    <td>{cur} {row.amount}</td>
                   </tr>
                 ))}
               </tbody>
