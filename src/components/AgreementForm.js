@@ -1,4 +1,4 @@
-import { useState} from 'react';
+import { useState, useEffect } from 'react';
 import AgreementPreview from './AgreementPreview';
 import './AgreementForm.css';
 import { supabase } from '../supabaseClient';
@@ -16,10 +16,20 @@ const getMonthName = (date) => {
   return date.toLocaleString('default', { month: 'long', year: 'numeric' });
 };
 
+const daySuffix = (d) => {
+  if (d >= 11 && d <= 13) return 'th';
+  switch (d % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+};
+
 const CURRENCIES = ['AED', 'USD', 'PKR', 'EUR', 'GBP', 'SAR'];
 
-function AgreementForm({ agreementType }) {
-  const [formData, setFormData] = useState({
+function AgreementForm({ agreementType, currentUser, initialData, draftId, onSaveDraft, onUpdateDraft, onLogActivity }) {
+  const defaultFormData = {
     refNumber: generateRefNumber(agreementType),
     date: new Date().toISOString().split('T')[0],
     currency: 'AED',
@@ -36,9 +46,17 @@ function AgreementForm({ agreementType }) {
     installmentStartDate: '',
     extraPaymentTerms: [],
     extraStandardTerms: [],
-  });
+  };
 
+  const [formData, setFormData] = useState(initialData || defaultFormData);
   const [showPreview, setShowPreview] = useState(false);
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [draftName, setDraftName] = useState('');
+
+  // If initialData changes (resume draft), reset form
+  useEffect(() => {
+    if (initialData) setFormData(initialData);
+  }, [initialData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -124,6 +142,24 @@ function AgreementForm({ agreementType }) {
     setFormData({ ...formData, extraStandardTerms: updated });
   };
 
+  // ── DRAFT HANDLERS ──
+  const handleSaveDraft = () => {
+    if (draftId) {
+      // Already a draft — update it
+      onUpdateDraft && onUpdateDraft(draftId, formData, agreementType);
+      alert('Draft updated successfully!');
+    } else {
+      // New draft — show name modal
+      setShowDraftModal(true);
+    }
+  };
+
+  const confirmSaveDraft = () => {
+    onSaveDraft && onSaveDraft(formData, agreementType, draftName.trim());
+    setShowDraftModal(false);
+    setDraftName('');
+  };
+
   // ── CALCULATIONS ──
   const subtotal = formData.products.reduce((sum, p) => {
     return sum + (parseFloat(p.qty) * parseFloat(p.rate) || 0);
@@ -139,39 +175,31 @@ function AgreementForm({ agreementType }) {
     formData.installmentMonths > 0 && remainingBalance > 0
       ? remainingBalance / parseFloat(formData.installmentMonths)
       : 0;
-const daySuffix = (d) => {
-  if (d >= 11 && d <= 13) return 'th';
-  switch (d % 10) {
-    case 1: return 'st';
-    case 2: return 'nd';
-    case 3: return 'rd';
-    default: return 'th';
-  }
-};
+
   const generatePaymentSchedule = () => {
     if (!formData.installmentMonths || monthlyInstallment <= 0) return [];
     const schedule = [];
     let startDate;
     if (formData.installmentStartDate) {
       startDate = new Date(formData.installmentStartDate);
-      startDate.setDate(1);
     } else {
       const today = new Date();
       startDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     }
+    const dayOfMonth = formData.installmentStartDate
+      ? new Date(formData.installmentStartDate).getDate()
+      : 5;
     for (let i = 0; i < parseInt(formData.installmentMonths); i++) {
       const date = new Date(startDate);
       date.setMonth(date.getMonth() + i);
-const monthLabel = getMonthName(date);
-const dayOfMonth = formData.installmentStartDate
-  ? new Date(formData.installmentStartDate).getDate()
-  : 5;
-schedule.push({
-  month: i + 1,
-  label: monthLabel,
-  amount: monthlyInstallment.toFixed(2),
-  dueDate: `${dayOfMonth}${daySuffix(dayOfMonth)} ${monthLabel}`,
-});
+      date.setDate(1);
+      const monthLabel = getMonthName(date);
+      schedule.push({
+        month: i + 1,
+        label: monthLabel,
+        amount: monthlyInstallment.toFixed(2),
+        dueDate: `${dayOfMonth}${daySuffix(dayOfMonth)} ${monthLabel}`,
+      });
     }
     return schedule;
   };
@@ -194,6 +222,8 @@ schedule.push({
         extraPaymentTerms={formData.extraPaymentTerms}
         extraStandardTerms={formData.extraStandardTerms}
         currency={currency}
+        currentUser={currentUser}
+        onLogActivity={onLogActivity}
         onBack={() => setShowPreview(false)}
       />
     );
@@ -201,10 +231,36 @@ schedule.push({
 
   return (
     <div className="agreement-form">
+
+      {/* Draft Name Modal */}
+      {showDraftModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Save as Draft</h3>
+            <p>Give this draft a name so you can find it easily later.</p>
+            <input
+              type="text"
+              placeholder={`e.g. ${formData.buyers[0]?.buyerCompany || 'Draft'} Agreement`}
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && confirmSaveDraft()}
+              autoFocus
+            />
+            <div className="modal-actions">
+              <button className="btn-modal-cancel" onClick={() => { setShowDraftModal(false); setDraftName(''); }}>Cancel</button>
+              <button className="btn-modal-save" onClick={confirmSaveDraft}>💾 Save Draft</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="form-header">
         <h2>{agreementType === 'sale' ? '📄 Sale Agreement' : '📋 Lease Cum Sale Agreement'}</h2>
-        <div className="ref-box">
-          <span>Ref: {formData.refNumber}</span>
+        <div className="form-header-right">
+          <div className="ref-box">
+            <span>Ref: {formData.refNumber}</span>
+          </div>
+          {draftId && <span className="draft-indicator">📝 Editing Draft</span>}
         </div>
       </div>
 
@@ -243,7 +299,6 @@ schedule.push({
                 <button className="btn-remove-buyer" onClick={() => removeBuyer(index)}>✕ Remove</button>
               )}
             </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label>Company Name</label>
@@ -258,7 +313,6 @@ schedule.push({
                 </div>
               )}
             </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label>Representative Name</label>
@@ -276,7 +330,6 @@ schedule.push({
                   onChange={(e) => handleBuyerChange(index, 'mobile', e.target.value)} />
               </div>
             </div>
-
             <div className="form-group id-upload-group">
               <input id={`id-upload-${index}-front`} type="file" accept="image/jpeg,image/png"
                 onChange={(e) => handleIdUpload(index, e.target.files[0], 'front')} className="id-upload-input" />
@@ -291,7 +344,6 @@ schedule.push({
                 </div>
               )}
             </div>
-
             <div className="form-group id-upload-group">
               <input id={`id-upload-${index}-back`} type="file" accept="image/jpeg,image/png"
                 onChange={(e) => handleIdUpload(index, e.target.files[0], 'back')} className="id-upload-input" />
@@ -306,7 +358,6 @@ schedule.push({
                 </div>
               )}
             </div>
-
           </div>
         ))}
         <button className="btn-add-buyer" onClick={addBuyer}>+ Add Another Buyer</button>
@@ -361,8 +412,7 @@ schedule.push({
                     onChange={(e) => handleProductChange(index, 'qty', e.target.value)} />
                 </td>
                 <td>
-                  <select value={product.unit}
-                    onChange={(e) => handleProductChange(index, 'unit', e.target.value)}>
+                  <select value={product.unit} onChange={(e) => handleProductChange(index, 'unit', e.target.value)}>
                     <option>NOS</option>
                     <option>KG</option>
                     <option>MTR</option>
@@ -387,7 +437,6 @@ schedule.push({
           </tbody>
         </table>
         <button className="btn-add-product" onClick={addProduct}>+ Add Product</button>
-
         <div className="totals-box">
           <div className="total-row">
             <span>Subtotal (Value for VAT)</span>
@@ -417,7 +466,6 @@ schedule.push({
             <input type="number" name="deliveryAmount" placeholder="0.00" value={formData.deliveryAmount} onChange={handleChange} />
           </div>
         </div>
-
         {(tokenAmount > 0 || deliveryAmount > 0) && total > 0 && (
           <div className="payment-summary">
             <div className="total-row">
@@ -434,7 +482,6 @@ schedule.push({
             </div>
           </div>
         )}
-
         <div className="form-row" style={{ marginTop: '16px' }}>
           <div className="form-group">
             <label>Number of Monthly Installments</label>
@@ -445,7 +492,6 @@ schedule.push({
             <input type="date" name="installmentStartDate" value={formData.installmentStartDate} onChange={handleChange} />
           </div>
         </div>
-
         {remainingBalance > 0 && formData.installmentMonths > 0 && (
           <div className="payment-summary">
             <div className="total-row total-final">
@@ -454,7 +500,6 @@ schedule.push({
             </div>
           </div>
         )}
-
         {paymentSchedule.length > 0 && (
           <div className="payment-schedule">
             <h4>Payment Schedule</h4>
@@ -488,12 +533,8 @@ schedule.push({
         {formData.extraPaymentTerms.map((term, index) => (
           <div className="extra-term-row" key={index}>
             <span className="term-prefix">{['V', 'VI', 'VII', 'VIII', 'IX', 'X'][index]}-</span>
-            <input
-              type="text"
-              placeholder="Enter additional payment term..."
-              value={term}
-              onChange={(e) => handlePaymentTermChange(index, e.target.value)}
-            />
+            <input type="text" placeholder="Enter additional payment term..." value={term}
+              onChange={(e) => handlePaymentTermChange(index, e.target.value)} />
             <button className="btn-remove-term" onClick={() => removePaymentTerm(index)}>✕</button>
           </div>
         ))}
@@ -506,12 +547,8 @@ schedule.push({
         {formData.extraStandardTerms.map((term, index) => (
           <div className="extra-term-row" key={index}>
             <span className="term-prefix">{String(index + 7).padStart(2, '0')}-</span>
-            <input
-              type="text"
-              placeholder="Enter additional standard term..."
-              value={term}
-              onChange={(e) => handleStandardTermChange(index, e.target.value)}
-            />
+            <input type="text" placeholder="Enter additional standard term..." value={term}
+              onChange={(e) => handleStandardTermChange(index, e.target.value)} />
             <button className="btn-remove-term" onClick={() => removeStandardTerm(index)}>✕</button>
           </div>
         ))}
@@ -519,6 +556,9 @@ schedule.push({
       </div>
 
       <div className="form-actions">
+        <button className="btn-save-draft" onClick={handleSaveDraft}>
+          💾 {draftId ? 'Update Draft' : 'Save as Draft'}
+        </button>
         <button className="btn-preview" onClick={() => setShowPreview(true)}>
           Preview & Sign Agreement →
         </button>

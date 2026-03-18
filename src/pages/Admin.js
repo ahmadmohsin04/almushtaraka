@@ -73,7 +73,6 @@ function Admin() {
   }
 
   if (selected) {
-    // Use buyers array if available, fallback to legacy single buyer fields
     const buyers = selected.buyers && selected.buyers.length > 0
       ? selected.buyers
       : [{
@@ -103,10 +102,11 @@ function Admin() {
               <div><label>Date</label><p>{selected.date}</p></div>
               <div><label>Type</label><p>{selected.agreement_type === 'sale' ? 'Sale Agreement' : 'Lease Cum Sale Agreement'}</p></div>
               <div><label>Created At</label><p>{formatDate(selected.created_at)}</p></div>
+              {selected.created_by && <div><label>Created By</label><p>{selected.created_by}</p></div>}
             </div>
           </div>
 
-          {/* Buyers - one block per buyer */}
+          {/* Buyers */}
           <div className="detail-section">
             <h3>Buyer Information {buyers.length > 1 ? `(${buyers.length} Buyers)` : ''}</h3>
             {buyers.map((buyer, index) => (
@@ -120,25 +120,25 @@ function Admin() {
                   <div><label>Mobile</label><p>{buyer.mobile || '—'}</p></div>
                 </div>
 
-{(buyer.idFrontUrl || buyer.idBackUrl) && (
-  <div className="buyer-id-image">
-    <label>Customer ID</label>
-    <div className="admin-id-sides">
-      {buyer.idFrontUrl && (
-        <div>
-          <p>Front</p>
-          <img src={buyer.idFrontUrl} alt="ID Front" />
-        </div>
-      )}
-      {buyer.idBackUrl && (
-        <div>
-          <p>Back</p>
-          <img src={buyer.idBackUrl} alt="ID Back" />
-        </div>
-      )}
-    </div>
-  </div>
-)}
+                {(buyer.idFrontUrl || buyer.idBackUrl) && (
+                  <div className="buyer-id-image">
+                    <label>Customer ID</label>
+                    <div className="admin-id-sides">
+                      {buyer.idFrontUrl && (
+                        <div>
+                          <p>Front</p>
+                          <img src={buyer.idFrontUrl} alt="ID Front" />
+                        </div>
+                      )}
+                      {buyer.idBackUrl && (
+                        <div>
+                          <p>Back</p>
+                          <img src={buyer.idBackUrl} alt="ID Back" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -250,6 +250,44 @@ function Admin() {
             </div>
           )}
 
+          {/* Remote Signatures */}
+          {selected.remote_signatures && Object.keys(selected.remote_signatures).length > 0 && (
+            <div className="detail-section">
+              <h3>🔗 Remote Signatures</h3>
+              <div className="admin-id-sides">
+                {Object.entries(selected.remote_signatures).map(([index, dataUrl]) => (
+                  <div key={index}>
+                    <p>{buyers[parseInt(index)]?.representativeName || `Buyer ${parseInt(index) + 1}`}</p>
+                    <img
+                      src={dataUrl}
+                      alt={`Buyer ${parseInt(index) + 1} remote signature`}
+                      style={{ width: '180px', height: '90px', objectFit: 'contain', border: '1px solid var(--grey-mid)', borderRadius: '6px', background: 'white' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Remote Photos */}
+          {selected.remote_photos && Object.keys(selected.remote_photos).length > 0 && (
+            <div className="detail-section">
+              <h3>📷 Remote Verification Photos</h3>
+              <div className="admin-id-sides">
+                {Object.entries(selected.remote_photos).map(([index, dataUrl]) => (
+                  <div key={index}>
+                    <p>{buyers[parseInt(index)]?.representativeName || `Buyer ${parseInt(index) + 1}`}</p>
+                    <img
+                      src={dataUrl}
+                      alt={`Buyer ${parseInt(index) + 1} verification`}
+                      style={{ width: '180px', height: '130px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--grey-mid)' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     );
@@ -298,6 +336,7 @@ function Admin() {
               <th>Buyer(s)</th>
               <th>Date</th>
               <th>Total (AED)</th>
+              <th>Signed</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -319,12 +358,18 @@ function Admin() {
                 <td>{a.date}</td>
                 <td>{parseFloat(a.total).toFixed(2)}</td>
                 <td>
+                  {a.remote_signatures && Object.keys(a.remote_signatures).length > 0
+                    ? <span className="signed-badge">✓ Signed</span>
+                    : <span className="pending-badge">Pending</span>
+                  }
+                </td>
+                <td>
                   <button className="btn-view" onClick={() => setSelected(a)}>View</button>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: '#999' }}>No agreements found.</td></tr>
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: '#999' }}>No agreements found.</td></tr>
             )}
           </tbody>
         </table>

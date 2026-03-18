@@ -1,0 +1,662 @@
+/* ── SIGN PAGE ── */
+.sign-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.sign-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--grey-text);
+}
+
+.sign-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--grey-mid);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sign-error-page,
+.sign-done-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg);
+}
+
+.sign-error-card,
+.sign-done-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 48px 36px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(28, 43, 26, 0.1);
+  border-top: 4px solid var(--gold);
+}
+
+.sign-error-icon,
+.sign-done-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.sign-error-card h2,
+.sign-done-card h2 {
+  color: var(--forest);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.sign-error-card p,
+.sign-done-card p {
+  color: var(--grey-text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.sign-done-ref {
+  margin-top: 16px;
+  color: var(--forest) !important;
+  font-size: 0.9rem !important;
+}
+
+/* ── HEADER ── */
+.sign-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0 20px;
+  border-bottom: 2px solid var(--grey-mid);
+  margin-bottom: 20px;
+}
+
+.sign-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.sign-header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.2rem;
+  color: var(--forest);
+  letter-spacing: 1.5px;
+  margin: 0 0 3px 0;
+}
+
+.sign-header p {
+  color: var(--grey-text);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+/* ── REVIEW BANNER ── */
+.sign-review-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--cream);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+}
+
+.sign-review-banner p {
+  margin: 0 0 4px 0;
+  color: var(--forest);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.sign-review-ref {
+  color: var(--grey-text) !important;
+  font-weight: 400 !important;
+  font-size: 0.8rem !important;
+}
+
+/* ── DOCUMENT ── */
+.sign-document {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(28, 43, 26, 0.07);
+  margin-bottom: 0;
+}
+
+.sign-doc-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--grey-mid);
+}
+
+.sign-doc-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.sign-doc-section h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--forest);
+  padding: 6px 12px;
+  border-radius: 4px;
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+  display: inline-block;
+}
+
+.sign-parties-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.sign-party {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.82rem;
+}
+
+.sign-party p {
+  margin: 2px 0;
+  color: #333;
+}
+
+.sign-party-label {
+  font-weight: 800 !important;
+  color: var(--forest) !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px !important;
+}
+
+.sign-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sign-table th {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sign-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  color: #222;
+}
+
+.sign-table tr:nth-child(even) td {
+  background: var(--bg);
+}
+
+.sign-total-row td {
+  background: var(--forest) !important;
+  color: var(--cream) !important;
+  font-weight: 700;
+}
+
+.sign-doc-section p {
+  font-size: 0.85rem;
+  color: #333;
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.sign-term {
+  font-size: 0.8rem !important;
+  color: #444 !important;
+  line-height: 1.6 !important;
+  margin: 8px 0 !important;
+}
+
+/* ── PROCEED BAR ── */
+.sign-proceed-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
+  border-top: 2px solid var(--grey-mid);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 -16px;
+  box-shadow: 0 -4px 20px rgba(28, 43, 26, 0.1);
+  flex-wrap: wrap;
+}
+
+.sign-proceed-bar p {
+  font-size: 0.82rem;
+  color: var(--grey-text);
+  margin: 0;
+  flex: 1;
+}
+
+.btn-sign-proceed {
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.btn-sign-proceed:hover {
+  background: var(--gold);
+  color: var(--forest);
+  transform: translateY(-1px);
+}
+
+/* ── PROGRESS ── */
+.sign-progress {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sign-progress-step {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--grey-mid);
+  color: var(--grey-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.sign-progress-step.active {
+  background: var(--forest);
+  color: var(--cream);
+  transform: scale(1.1);
+}
+
+.sign-progress-step.done {
+  background: var(--gold);
+  color: var(--forest);
+}
+
+/* ── SIGN CARD ── */
+.sign-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 28px 24px;
+  box-shadow: 0 4px 24px rgba(28, 43, 26, 0.1);
+}
+
+.sign-buyer-info {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--grey-mid);
+}
+
+.sign-buyer-info h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0 0 4px 0;
+}
+
+.sign-buyer-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--forest);
+  margin: 0 0 4px 0;
+}
+
+.sign-buyer-company {
+  font-size: 0.88rem;
+  color: var(--grey-text);
+  margin: 0;
+}
+
+.sign-section {
+  margin-bottom: 24px;
+}
+
+.sign-section h3 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--forest);
+  margin: 0 0 6px 0;
+}
+
+.sign-section-hint {
+  font-size: 0.8rem;
+  color: var(--grey-text);
+  margin: 0 0 12px 0;
+}
+
+.btn-sign-camera {
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.btn-sign-camera:hover {
+  background: var(--gold);
+  color: var(--forest);
+}
+
+.sign-camera-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.sign-camera-video {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 10px;
+  border: 2px solid var(--gold);
+}
+
+.sign-camera-btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.btn-sign-capture {
+  flex: 1;
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-sign-capture:hover {
+  background: var(--gold);
+  color: var(--forest);
+}
+
+.btn-sign-cancel {
+  background: var(--grey-mid);
+  color: var(--forest);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.sign-photo-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.sign-photo-preview img {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 10px;
+  border: 2px solid var(--gold);
+}
+
+.btn-sign-retake {
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  color: var(--forest);
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-sign-retake:hover {
+  background: var(--gold);
+  color: var(--forest);
+}
+
+.sign-canvas-wrap {
+  border: 2px solid var(--grey-mid);
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  margin-bottom: 10px;
+}
+
+.sign-canvas {
+  width: 100% !important;
+  height: 130px !important;
+  cursor: crosshair;
+  display: block;
+}
+
+.btn-sign-clear {
+  background: transparent;
+  border: 1.5px solid var(--grey-mid);
+  color: var(--grey-text);
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-sign-clear:hover {
+  border-color: var(--forest);
+  color: var(--forest);
+}
+
+.btn-sign-next {
+  width: 100%;
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+}
+
+.btn-sign-next:hover {
+  background: var(--gold);
+  color: var(--forest);
+  transform: translateY(-1px);
+}
+
+/* ── CONFIRM ── */
+.sign-confirm-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 28px 24px;
+  box-shadow: 0 4px 24px rgba(28, 43, 26, 0.1);
+}
+
+.sign-confirm-card h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.6rem;
+  color: var(--forest);
+  letter-spacing: 1px;
+  margin: 0 0 8px 0;
+}
+
+.sign-confirm-card > p {
+  color: var(--grey-text);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.sign-confirm-sigs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.sign-confirm-item {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid var(--grey-mid);
+}
+
+.sign-confirm-name {
+  font-weight: 700;
+  color: var(--forest);
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+}
+
+.sign-confirm-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sign-confirm-box {
+  flex: 1;
+  min-width: 120px;
+}
+
+.sign-confirm-box span {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.sign-confirm-box img {
+  width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid var(--grey-mid);
+  background: white;
+}
+
+.sign-confirm-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-sign-back {
+  background: transparent;
+  border: 2px solid var(--grey-mid);
+  color: var(--grey-text);
+  border-radius: 8px;
+  padding: 13px 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.88rem;
+}
+
+.btn-sign-back:hover {
+  border-color: var(--forest);
+  color: var(--forest);
+}
+
+.btn-sign-submit {
+  flex: 1;
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+.btn-sign-submit:hover {
+  background: var(--gold);
+  color: var(--forest);
+}
+
+.btn-sign-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .sign-parties-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sign-proceed-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-sign-proceed {
+    text-align: center;
+  }
+}

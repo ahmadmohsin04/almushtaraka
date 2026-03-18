@@ -490,3 +490,23 @@
   border-radius: 6px;
   border: 1px solid var(--grey-mid);
 }
+
+.signed-badge {
+  background: #eafaf1;
+  color: #27ae60;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #27ae60;
+}
+
+.pending-badge {
+  background: var(--cream);
+  color: var(--grey-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--grey-mid);
+}
